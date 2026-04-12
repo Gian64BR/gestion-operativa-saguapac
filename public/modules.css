@@ -1,0 +1,1732 @@
+/**
+ * Cooperative Agua - Modules Specific Styles (Tables, Timelines, Task Boards)
+ * Extends dashboard.css
+ */
+
+/* ============================================
+   CONTACTOS - Card-Based Directory Design
+   ============================================ */
+
+.contacts-list-container {
+    width: 100%;
+    padding: 0.5rem;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease;
+}
+
+.contact-card:hover {
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.1);
+    border-color: rgba(20, 184, 166, 0.3);
+}
+
+.contact-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    color: #475569;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.contact-avatar-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Número interno — elemento más visible y dominante */
+.contact-internal-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0d9488;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.15rem;
+}
+
+/* Correlativo de registro — pequeño y discreto */
+.contact-correlativo {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.contact-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin-bottom: 0.15rem;
+    line-height: 1.2;
+}
+
+.contact-role-inline {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.contact-edit-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #0d9488;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.contact-edit-icon:hover {
+    background: rgba(13, 148, 136, 0.1);
+    color: #0f766e;
+}
+
+/* Contact card body */
+.contact-card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(203, 213, 225, 0.5) 0%, rgba(203, 213, 225, 0.2) 100%);
+    margin: 0 0 0.75rem 0;
+}
+
+.contact-card-body {
+    padding: 0;
+}
+
+/* Details grid: Area, Gerencia, Telefono */
+.contact-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.contact-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.contact-detail-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.contact-detail-value {
+    font-size: 0.85rem;
+    color: var(--color-text-dark);
+    line-height: 1.3;
+}
+
+.contact-detail-phone {
+    font-weight: 600;
+    color: #0d9488;
+}
+
+/* Nota section */
+.contact-nota {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: #475569;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.contact-nota svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #0d9488;
+}
+
+.contact-nota span {
+    flex: 1;
+}
+
+/* ============================================
+   DESKTOP - Compact Contact Cards (Web Mode)
+   ============================================ */
+
+@media (min-width: 769px) {
+    .contacts-list-container {
+        max-height: none !important;
+        overflow-y: visible;
+    }
+
+    .contact-card {
+        padding: 0.875rem 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
+    }
+
+    .contact-card-header {
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .contact-avatar-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.05rem;
+    }
+
+    .contact-internal-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.1rem;
+    }
+
+    .contact-correlativo {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+    }
+
+    .contact-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0;
+        line-height: 1.2;
+        order: 1;
+    }
+
+    .contact-role-inline {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+        order: 2;
+    }
+
+    .contact-card-divider {
+        margin: 0 0 0.5rem 0;
+    }
+
+    .contact-edit-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .contact-edit-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Desktop: Details grid adjustments */
+    .contact-details-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem 1.5rem;
+        margin-bottom: 0;
+    }
+
+    .contact-detail-label {
+        font-size: 0.6rem;
+    }
+
+    .contact-detail-value {
+        font-size: 0.8rem;
+    }
+
+    .contact-nota {
+        margin-top: 0.6rem;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.65rem;
+    }
+}
+
+/* --- Data Tables (Contactos) - Desktop & Base --- */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.data-table th {
+    font-weight: 600;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: #f8fafc;
+}
+
+.data-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f0fdfa;
+    border-left: 3px solid var(--color-accent-teal);
+}
+
+/* Internal Number Badge - Compact */
+.badge-internal {
+    background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+    color: #0d9488;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+/* User Avatar inside table */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-dark);
+}
+
+.avatar-sm {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* --- Task Board (Tareas Operativas) --- */
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.task-column {
+    background-color: #f8fafc;
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.task-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.task-count {
+    background-color: #cbd5e1;
+    color: #475569;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.task-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.task-card h4 {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.task-card p {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+}
+
+.tag {
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.tag-red {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.tag-yellow {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.tag-blue {
+    background-color: #e0f2fe;
+    color: #0284c7;
+}
+
+/* --- System History (Timeline) --- */
+.history-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    /* Center of the 14px dot (16px left + 7px half width) */
+    top: 5px;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--color-border);
+}
+
+.history-item {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-left: 2.5rem;
+}
+
+.history-dot {
+    position: absolute;
+    left: -14px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: white;
+    border: 3px solid var(--color-accent-teal);
+    z-index: 1;
+}
+
+/* Colors for history categories */
+.dot-cut {
+    border-color: #ef4444;
+}
+
+/* Red for outages */
+.dot-mod {
+    border-color: #eab308;
+}
+
+/* Yellow for modifications */
+.dot-sys {
+    border-color: #3b82f6;
+}
+
+/* Blue for system log */
+
+.history-content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    border: 1px solid var(--color-border);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.history-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.history-time {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.history-body {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.history-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-sidebar);
+}
+
+/* Page headers */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- Calculator Layout Elements --- */
+.proc-buttons {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.proc-btn {
+    background-color: #f1f5f9;
+    color: var(--color-sidebar);
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 1.2rem;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.proc-btn:hover {
+    background-color: #e2e8f0;
+    color: var(--color-accent-teal);
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.proc-btn.active {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    border-color: #bae6fd;
+    font-weight: 600;
+}
+
+.proc-btn span:first-child {
+    font-size: 1.1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-dark);
+}
+
+.form-input {
+    padding: 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #f8fafc;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-accent-teal);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    background-color: white;
+}
+
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px dashed var(--color-accent-teal);
+    color: var(--color-accent-teal);
+}
+
+.btn-outline:hover {
+    background-color: rgba(13, 148, 136, 0.05);
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--color-border);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES FOR MODULES
+   ============================================ */
+
+@media (max-width: 768px) {
+
+    /* Contactos - Card Design Mobile */
+    .contact-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
+    }
+
+    .contact-card-header {
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .contact-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+
+    .contact-avatar-img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .contact-internal-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.1rem;
+    }
+
+    .contact-correlativo {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+    }
+
+    .contact-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .contact-role-inline {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .contact-card-divider {
+        margin: 0 0 0.75rem 0;
+    }
+
+    .contact-edit-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .contact-edit-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Mobile: Details grid single column */
+    .contact-details-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-detail-label {
+        font-size: 0.6rem;
+    }
+
+    .contact-detail-value {
+        font-size: 0.8rem;
+    }
+
+    .contact-nota {
+        margin-top: 0.5rem;
+        font-size: 0.73rem;
+        padding: 0.5rem 0.6rem;
+    }
+
+    /* Data tables - Compact card layout for Contactos (Mobile) */
+    .table-container {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: visible;
+        padding: 0.5rem 0;
+    }
+
+    .data-table {
+        display: block;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tbody {
+        display: block;
+    }
+
+    .data-table tbody tr {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: white;
+        border-radius: 12px;
+        padding: 0.75rem;
+        margin-bottom: 0.6rem;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: #f0fdfa;
+        box-shadow: 0 2px 6px rgba(20, 184, 166, 0.15);
+        border-color: var(--color-accent-teal);
+    }
+
+    .data-table tbody td {
+        display: block;
+        padding: 0;
+        border: none;
+        text-align: left;
+    }
+
+    /* Badge - Compact */
+    .badge-internal {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+        color: #0d9488;
+        border-radius: 8px;
+        display: inline-block;
+        letter-spacing: 0.5px;
+    }
+
+    /* Avatar - Small & Clean */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #14b8a6, #0d9488);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* User cell - Horizontal layout */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--color-text-dark);
+        flex: 1;
+        min-width: 120px;
+    }
+
+    /* Area - Compact inline */
+    .data-table tbody td:nth-child(3) {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        white-space: nowrap;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .data-table tbody td:nth-child(3)::before {
+        content: '';
+        display: none;
+    }
+
+    /* Role - Hidden on mobile to save space (shown on expand if needed) */
+    .data-table tbody td:nth-child(4) {
+        display: none;
+    }
+
+    /* Action button - Icon only */
+    .data-table tbody td:last-child {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .more-options {
+        background: transparent;
+        color: var(--color-accent-teal);
+        padding: 0.4rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .more-options:hover {
+        background: var(--color-accent-light);
+    }
+
+    /* Task board - Single column on mobile */
+    .tasks-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .task-column {
+        padding: 1rem;
+    }
+
+    .task-card {
+        padding: 1rem;
+    }
+
+    .task-card h4 {
+        font-size: 0.9rem;
+    }
+
+    .task-card p {
+        font-size: 0.75rem;
+    }
+
+    /* Page header */
+    .page-header {
+        margin-bottom: 1rem;
+    }
+
+    .page-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .page-header p {
+        font-size: 0.8rem;
+    }
+
+    /* Procedure buttons - Horizontal scroll */
+    .proc-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .proc-btn {
+        min-width: max-content;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8rem;
+        border-radius: 20px;
+    }
+
+    /* ============================================
+       GESTIÓN DE TAREAS - MOBILE OPTIMIZED
+       ============================================ */
+
+    /* Procedure buttons - Clean grid layout for mobile */
+    .proc-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+        overflow-x: visible;
+        padding: 0;
+        margin-bottom: 1.2rem;
+    }
+
+    .proc-btn {
+        min-width: auto;
+        padding: 0.7rem 0.5rem;
+        font-size: 0.7rem;
+        border-radius: 12px;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        min-height: 70px;
+    }
+
+    .proc-btn span:first-child {
+        font-size: 1.3rem;
+        line-height: 1;
+    }
+
+    .proc-btn span:last-child {
+        display: block;
+    }
+
+    /* First button (En Base) spans full width */
+    .proc-buttons .proc-btn:first-child {
+        grid-column: span 2;
+        background-color: #e0f2fe;
+        color: #0284c7;
+        border-color: #bae6fd;
+        font-weight: 600;
+        min-height: 60px;
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .proc-buttons .proc-btn:first-child span:first-child {
+        font-size: 1.2rem;
+    }
+
+    .proc-btn.active {
+        background-color: #e0f2fe;
+        color: #0284c7;
+        border-color: #bae6fd;
+        font-weight: 600;
+    }
+
+    /* Form inputs */
+    .form-input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+    }
+
+    /* ============================================
+       CALCULADORAS - OPTIMIZACIÓN MÓVIL
+       ============================================ */
+
+    /* Form container */
+    .procedures-container {
+        padding: 0 0.75rem !important;
+    }
+
+    .procedures-container .card {
+        padding: 1rem 0.75rem !important;
+    }
+
+    /* Header de calculadora */
+    .procedures-container h3 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Botones de Información y Nueva tarea */
+    .procedures-container>div>div:first-child>div {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+
+    .procedures-container>div>div:first-child button {
+        width: 100% !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.8rem !important;
+        border-radius: 10px !important;
+    }
+
+    /* Grid de 2 columnas - apilar verticalmente */
+    .procedures-container div[style*="grid-template-columns:1fr 1fr"],
+    .procedures-container div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    /* Grid de 3 columnas - apilar verticalmente */
+    .procedures-container div[style*="grid-template-columns:1fr 1fr 1fr"],
+    .procedures-container div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 0.8rem !important;
+    }
+
+    /* Inputs en filas (meses afectados, etc.) */
+    .mes-afectado-row,
+    .mes-alto-row,
+    .mes-afectado-row>div,
+    .mes-alto-row>div {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .mes-afectado-row>*,
+    .mes-alto-row>*,
+    [style*="flex:1;"] {
+        flex: 1 1 calc(50% - 0.5rem) !important;
+        min-width: calc(50% - 0.5rem) !important;
+    }
+
+    /* Botón de eliminar en filas */
+    .mes-afectado-row>button,
+    .mes-alto-row>button,
+    [style*="background:#fee2e2"] {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        padding: 0.6rem !important;
+        order: 3;
+    }
+
+    /* Botón Añadir mes */
+    .btn-outline {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        margin: 0.5rem 0;
+    }
+
+    /* Caja de promedio */
+    .procedures-container div[style*="display:flex;align-items:center;gap:1rem"] {
+        flex-wrap: wrap !important;
+        gap: 0.75rem !important;
+    }
+
+    .procedures-container div[style*="display:flex;align-items:center;gap:1rem"]>div {
+        min-width: 100px !important;
+        flex: 1 !important;
+    }
+
+    /* Botón Calcular */
+    .procedures-container div[style*="text-align:center"] {
+        margin: 1rem 0 !important;
+    }
+
+    .procedures-container div[style*="text-align:center"] button {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.9rem !important;
+        border-radius: 14px !important;
+    }
+
+    /* Caja de resultado */
+    #finalResultBox {
+        margin: 0.5rem 0 1rem 0 !important;
+    }
+
+    #finalResultBox>div {
+        padding: 1rem !important;
+        gap: 1rem !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    #resultFormula {
+        font-size: 0.85rem !important;
+        line-height: 1.6 !important;
+        text-align: center;
+        width: 100% !important;
+    }
+
+    #resultFinalBox {
+        font-size: 1rem !important;
+        min-width: auto !important;
+        padding: 0.5rem 0.8rem !important;
+        margin: 0 auto;
+    }
+
+    /* Fórmulas matemáticas */
+    #resultFormula>div {
+        font-size: 1rem !important;
+        gap: 1.5rem !important;
+    }
+
+    #resultFormula small {
+        font-size: 0.75rem !important;
+        display: block;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Caja de reducción por meses */
+    #reduccionMesesBox {
+        margin-bottom: 1rem !important;
+    }
+
+    #reduccionMesesBox>div {
+        padding: 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Alertas de validación */
+    #diasWarningAlert,
+    #diasWarningAlert803,
+    #validacionAlert {
+        padding: 0.75rem !important;
+        font-size: 0.8rem !important;
+        margin-bottom: 1rem !important;
+        word-wrap: break-word;
+    }
+
+    /* Títulos de sección (h4) */
+    .procedures-container h4 {
+        font-size: 0.95rem !important;
+        margin-top: 1rem !important;
+    }
+
+    /* Párrafos de información */
+    .procedures-container p {
+        font-size: 0.8rem !important;
+    }
+
+    /* Inputs de formulario */
+    .procedures-container input[type="number"],
+    .procedures-container input[type="text"],
+    .procedures-container input[type="date"],
+    .procedures-container select {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        min-height: 44px;
+    }
+
+    /* Calendar card */
+    .calendar-card {
+        padding: 1rem !important;
+    }
+
+    .calendar-card .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .calendar-card .card-header h3 {
+        font-size: 0.95rem;
+    }
+
+    #almanacCurrentDate {
+        display: block !important;
+        margin-left: 0 !important;
+        margin-top: 0.25rem;
+    }
+
+    .calendar-card select,
+    .calendar-card button {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .calendar-days {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .day-box {
+        min-width: 50px;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .day-box h4 {
+        font-size: 0.95rem;
+    }
+
+    .day-box span {
+        font-size: 0.65rem;
+    }
+
+    /* Calendar navigation buttons */
+    .cal-nav-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem;
+    }
+
+    /* History timeline */
+    .history-timeline::before {
+        left: 18px;
+    }
+
+    .history-item {
+        padding-left: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .history-dot {
+        left: -11px;
+        width: 12px;
+        height: 12px;
+        border-width: 2px;
+    }
+
+    .history-content {
+        padding: 1rem;
+    }
+
+    .history-title {
+        font-size: 0.9rem;
+    }
+
+    .history-time {
+        font-size: 0.7rem;
+    }
+
+    .history-body {
+        font-size: 0.8rem;
+    }
+
+    /* Admin panel for contacts - Mobile optimized */
+    #adminContactosPanel {
+        padding: 1rem !important;
+    }
+
+    #adminContactosPanel h3 {
+        font-size: 1rem !important;
+    }
+
+    #adminContactosPanel input[type="text"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Admin panel form grid - stack inputs on mobile */
+    #adminContactosPanel div[style*="grid-template-columns: 1fr 1fr"],
+    #adminContactosPanel div[style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+
+    #adminContactosPanel .form-input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0.7rem 0.9rem !important;
+        font-size: 0.85rem !important;
+        border-radius: 12px !important;
+    }
+
+    #adminContactosPanel button {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.85rem !important;
+        border-radius: 14px !important;
+        min-height: 48px !important;
+    }
+
+    /* Card adjustments */
+    .card {
+        padding: 1rem !important;
+        border-radius: 12px;
+    }
+}
+
+/* ============================================
+   EXTRA SMALL DEVICES (< 375px)
+   ============================================ */
+
+@media (max-width: 375px) {
+    .proc-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .proc-buttons .proc-btn:first-child {
+        grid-column: span 1;
+        flex-direction: column;
+        min-height: 70px;
+    }
+
+    .proc-btn {
+        font-size: 0.75rem;
+        padding: 0.75rem 0.6rem;
+        min-height: 65px;
+    }
+
+    .proc-btn span:first-child {
+        font-size: 1.2rem;
+    }
+
+    .mes-afectado-row>*,
+    .mes-alto-row>* {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    .procedures-container h3 {
+        font-size: 1rem !important;
+    }
+
+    #resultFormula>div {
+        font-size: 0.9rem !important;
+        gap: 1rem !important;
+    }
+
+    #resultFinalBox {
+        font-size: 0.9rem !important;
+        padding: 0.4rem 0.6rem !important;
+    }
+}
+
+/* ============================================
+   DESKTOP - TABLE LAYOUT
+   ============================================ */
+
+@media (min-width: 769px) {
+
+    /* Reset table display for desktop */
+    .data-table {
+        display: table;
+    }
+
+    .data-table thead {
+        display: table-header-group;
+    }
+
+    .data-table tbody {
+        display: table-row-group;
+    }
+
+    .data-table tbody tr {
+        display: table-row;
+    }
+
+    .data-table tbody td {
+        display: table-cell;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Show all columns on desktop */
+    .data-table tbody td:nth-child(4) {
+        display: table-cell;
+    }
+
+    /* Desktop hover effect */
+    .data-table tbody tr:hover {
+        background-color: #f0fdfa;
+        border-left: 3px solid var(--color-accent-teal);
+    }
+
+    /* Reset any mobile overrides */
+    .proc-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding: 0;
+        margin-bottom: 2rem;
+        gap: 0.8rem;
+    }
+
+    .proc-btn {
+        min-width: auto;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        border-radius: 24px;
+        text-align: center;
+        white-space: nowrap;
+        line-height: normal;
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: auto;
+    }
+
+    .proc-btn span:first-child {
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+
+    .proc-btn span:last-child {
+        display: inline;
+    }
+
+    .proc-buttons .proc-btn:first-child {
+        grid-column: auto;
+        background-color: #f1f5f9;
+        color: var(--color-sidebar);
+        border-color: #e2e8f0;
+        font-weight: 500;
+        flex-direction: row;
+        min-height: auto;
+    }
+
+    .proc-btn.active {
+        background-color: #e0f2fe;
+        color: #0284c7;
+        border-color: #bae6fd;
+        font-weight: 600;
+    }
+
+    .procedures-container {
+        padding: 0 1.5rem !important;
+    }
+
+    .procedures-container .card {
+        padding: 2rem !important;
+    }
+
+    .procedures-container>div>div:first-child>div {
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+    }
+
+    .procedures-container>div>div:first-child button {
+        width: auto !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+        border-radius: 20px !important;
+    }
+}
+
+/* ============================================
+   AUDIT HISTORY DETAIL MODAL - Structured Layout
+   ============================================ */
+
+.audit-detail-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 92%;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.audit-detail-title {
+    color: var(--color-sidebar);
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.audit-detail-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: color 0.2s;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.audit-detail-close:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.audit-detail-body-container {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.audit-detail-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.audit-detail-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-border);
+}
+
+.audit-detail-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+
+.audit-detail-value {
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+    font-weight: 500;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.audit-detail-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+}
+
+.audit-detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.audit-detail-meta svg {
+    flex-shrink: 0;
+}
+
+.audit-detail-meta strong {
+    color: var(--color-sidebar);
+    font-weight: 600;
+}
+
+.audit-detail-section {
+    margin-top: 1.5rem;
+}
+
+.audit-ticket-box {
+    border: 2px solid #334155;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.audit-ticket-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    gap: 2rem;
+}
+
+.audit-ticket-formula {
+    font-size: 1rem;
+    color: #1e293b;
+    font-family: 'Courier New', monospace;
+    line-height: 2;
+    flex: 1;
+}
+
+.audit-ticket-result {
+    border: 3px solid #334155;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    font-family: 'Courier New', monospace;
+    min-width: 110px;
+    text-align: center;
+}
+
+.audit-detail-body {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.audit-detail-text {
+    white-space: pre-line;
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #1e293b;
+}
+
+.audit-detail-expand {
+    margin-top: 0.75rem;
+    border-top: 1px dashed var(--color-border);
+    padding-top: 0.75rem;
+}
+
+.audit-detail-expand summary {
+    color: var(--color-sidebar);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.audit-detail-expand summary:hover {
+    color: var(--color-accent-teal);
+}
+
+.audit-detail-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.audit-detail-close-btn {
+    background: var(--color-sidebar);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.75rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.audit-detail-close-btn:hover {
+    background: #2d3f4d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(28, 43, 54, 0.3);
+}
+
+/* Responsive adjustments for audit modal */
+@media (max-width: 768px) {
+    .audit-detail-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .audit-detail-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .audit-detail-body-container {
+        padding: 1.5rem;
+    }
+
+    .audit-detail-item {
+        padding: 0.875rem 1rem;
+    }
+
+    .audit-detail-value {
+        font-size: 0.9rem;
+    }
+
+    .audit-ticket-content {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .audit-ticket-formula {
+        text-align: center;
+    }
+
+    .audit-detail-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .audit-detail-footer-actions {
+        padding: 1rem 1.5rem;
+    }
+
+    .audit-detail-close-btn {
+        width: 100%;
+    }
+}

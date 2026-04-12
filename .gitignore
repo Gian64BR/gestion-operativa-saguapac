@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment secrets
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.qwen/
+.agents/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Backups y Archivos Temporales de Prueba
+db/backup_pre_cleanup_*.json
+test-api.js

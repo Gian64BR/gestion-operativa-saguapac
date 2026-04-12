@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas Operativas - Cooperativa de Agua</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="modules.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Left Sidebar (Desktop) -->
+        <aside class="sidebar">
+            <div class="logo-btn">CA</div>
+
+            <div class="nav-item" onclick="window.location.href='dashboard.html'" title="Panel Principal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </div>
+            <div class="nav-item" onclick="window.location.href='contactos.html'" title="Contactos Internos">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div class="nav-item active" onclick="window.location.href='tareas.html'"
+                title="Gestión de Tareas Operativas">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                    </path>
+                </svg>
+            </div>
+            <div class="nav-item" onclick="window.location.href='historial.html'" title="Historial del Sistema">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <div class="nav-item" style="margin-top: auto;" onclick="window.location.href='index.html'"
+                title="Cerrar Sesión">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+        </aside>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <button class="mobile-nav-item" onclick="window.location.href='dashboard.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Inicio</span>
+            </button>
+            <button class="mobile-nav-item" onclick="window.location.href='contactos.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Contactos</span>
+            </button>
+            <button class="mobile-nav-item active" onclick="window.location.href='tareas.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                    </path>
+                </svg>
+                <span>Tareas</span>
+            </button>
+            <button class="mobile-nav-item" onclick="window.location.href='historial.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Historial</span>
+            </button>
+            <button class="mobile-nav-item" onclick="window.location.href='index.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Salir</span>
+            </button>
+        </nav>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="search-bar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="globalSearchInput" placeholder="Buscar coincidencia (Ejemplo: UV 01)"
+                        autocomplete="off" data-lpignore="true" data-form-type="other">
+                    <div id="searchResultsDropdown" class="search-results-dropdown" style="display: none;"></div>
+                </div>
+
+                <div class="header-actions">
+                    <!-- Action Button specifically for Tasks (REMOVED) -->
+
+                    <div
+                        style="display:flex; gap:15px; padding: 0.4rem 1rem; border-radius: 20px; background: white; border: 1px solid var(--color-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); align-items:center;">
+                        <!-- Message Icon -->
+                        <div class="action-icon" id="messageBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span class="notification-badge" id="messageBadge"></span>
+                            <div class="dropdown-menu" id="messageMenu" style="display: none;">
+                                <div class="dropdown-header">Mensajes Internos</div>
+                                <div id="messagesList" class="dropdown-list"></div>
+                            </div>
+                        </div>
+                        <!-- Notification Icon -->
+                        <div class="action-icon" id="notificationBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="notification-badge" id="notifBadge"></span>
+                            <div class="dropdown-menu" id="notificationMenu" style="display: none;">
+                                <div class="dropdown-header">Alertas de Sistema</div>
+                                <div id="notificationsList" class="dropdown-list"></div>
+                            </div>
+                        </div>
+                        <!-- User Profile (Static Version) -->
+                        <div class="user-profile" id="profileBtn" style="cursor: default; background: transparent;">
+                            <div class="profile-dropdown">
+                                <div class="profile-avatar" id="headerAvatar">C</div>
+                                <span id="currentUserObj">Usuario</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-header">
+                <h2>Gestión de Tareas Operativas</h2>
+                <p>Correcciones de facturas, atención de reclamos y operaciones en terreno</p>
+            </div>
+
+            <main class="procedures-container">
+                <!-- Botones de Procedimientos -->
+                <div class="proc-buttons">
+                    <button class="proc-btn active" onclick="selectProc('base', this)">
+                        <span>📊</span>
+                        <span>En Base (8.01)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.01', this)">
+                        <span>🔧</span>
+                        <span>Arreglo de fuga (8.01)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.02', this)">
+                        <span>📈</span>
+                        <span>Promedio elevado (8.02)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.03', this)">
+                        <span>💧</span>
+                        <span>Cambio de medidor (8.03)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.04', this)">
+                        <span>📋</span>
+                        <span>Mala lectura (8.04)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.06', this)">
+                        <span>🔄</span>
+                        <span>Cambio de categoría (8.06)</span>
+                    </button>
+                    <button class="proc-btn" onclick="selectProc('8.07', this)">
+                        <span>🚿</span>
+                        <span>Purga de instalación (8.07)</span>
+                    </button>
+                </div>
+
+                <!-- Contenedor Dinámico del Formulario — JS lo construye al seleccionar procedimiento -->
+                <div class="card form-container" id="procFormContainer">
+                    <!-- Contenido inyectado dinámicamente por tareas_logic.js -->
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/tareas_logic.js"></script>
+</body>
+
+</html>
