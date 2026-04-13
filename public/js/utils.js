@@ -174,21 +174,18 @@ function logout() {
         clearInterval(window._heartbeatInterval);
         window._heartbeatInterval = null;
     }
-    // Llamar al backend para registrar logout en auditoría
-    if (userId) {
+    // Limpiar TODA la sesión SÍNCRONAMENTE e inmediatamente
+    localStorage.clear();
+    // Llamar al backend para registrar logout en auditoría (fire and forget)
+    if (userId && userId !== 'null' && userId !== 'undefined') {
         fetch('/api/logout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
-        }).catch(err => console.error('Error al registrar logout:', err));
+        }).catch(() => { }); // Silenciar errores — no bloquear logout
     }
-    // Limpiar TODA la sesión
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('profileDisplayName');
-    // Redirigir inmediatamente a login
-    window.location.href = '/index.html';
+    // Redirigir usando replace para que el usuario no pueda volver con el botón "Atrás"
+    window.location.replace('/index.html');
 }
 
 /**
@@ -224,10 +221,13 @@ function startHeartbeat() {
     }, 30000); // Cada 30 segundos
 }
 
-// Iniciar heartbeat cuando el usuario está logueado
-if (localStorage.getItem('userId')) {
-    startHeartbeat();
-}
+// Iniciar heartbeat cuando el usuario está logueado (doble verificación)
+(function () {
+    const userId = localStorage.getItem('userId');
+    if (userId && userId !== 'null' && userId !== 'undefined') {
+        startHeartbeat();
+    }
+})();
 
 function setupHeader() {
     // 1. Setup Profile Name & Role (Sync Transversal)
