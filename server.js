@@ -1,4 +1,4 @@
-require('dotenv').config({ override: true });
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -11,9 +11,11 @@ app.use(cors());
 app.use(express.json()); // Permite aceptar requests con body en formato JSON
 app.use(express.static(path.join(__dirname, 'public'))); // Servir archivos estáticos del frontend
 
-// Inicializar base de datos automáticamente
-const { initDatabase } = require('./db/init-db');
-initDatabase();
+// Inicializar base de datos automáticamente (solo en local, no en Vercel)
+if (!process.env.VERCEL) {
+    const { initDatabase } = require('./db/init-db');
+    initDatabase().catch(err => console.error("Error inicializando BD:", err));
+}
 
 // Rutas de API
 const authRoutes = require('./routes/auth');
@@ -71,9 +73,14 @@ app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Arrancar el servidor
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor de Call Center en funcionamiento en el puerto ${PORT}`);
-    console.log(`API disponible en http://localhost:${PORT}/api`);
-    console.log(`Acceso local: http://127.0.0.1:${PORT}`);
-});
+// Arrancar el servidor (solo en entorno local, Vercel gestiona las peticiones directamente a la app exportada)
+if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Servidor de Call Center en funcionamiento en el puerto ${PORT}`);
+        console.log(`API disponible en http://localhost:${PORT}/api`);
+        console.log(`Acceso local: http://127.0.0.1:${PORT}`);
+    });
+}
+
+// Exportar la aplicación para Serverless Functions en Vercel
+module.exports = app;
