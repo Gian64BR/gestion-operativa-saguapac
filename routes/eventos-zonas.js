@@ -85,8 +85,6 @@ router.post('/events', async (req, res) => {
     try {
         const { titulo, detalle, fecha, hora_inicio, hora_fin, zona_id, uv_afectada, estado } = req.body;
 
-        console.log('📝 Creando evento:', { titulo, fecha, hora_inicio, hora_fin, estado });
-
         if (!titulo || !fecha) {
             return res.status(400).json({
                 success: false,
@@ -101,7 +99,6 @@ router.post('/events', async (req, res) => {
         );
 
         const nuevoEvento = result.rows[0];
-        console.log('✅ Evento creado con ID:', nuevoEvento.id);
 
         // Registrar en bitácora del sistema
         await logCreate({
@@ -137,7 +134,6 @@ router.post('/events', async (req, res) => {
                     `Zona: ${zonaNombre}. ${uvInfo}. Fecha del corte: ${fecha}. ${detalle || ''}. ${horarioInfo}`,
                     idEvento]
             );
-            console.log('✅ Evento registrado en auditoría');
         } catch (auditErr) {
             console.error('⚠️ Error al registrar en auditoría:', auditErr.message);
             // No fallar la operación principal si falla la auditoría
@@ -210,7 +206,6 @@ router.put('/events/:id', async (req, res) => {
                     `Zona: ${zonaNombre}. ${uvInfo}. Fecha del corte: ${fecha}. ${detalle || ''}. ${horarioInfo}. ${estadoInfo}`,
                     idEvento]
             );
-            console.log('✅ Modificación de evento registrada en auditoría');
         } catch (auditErr) {
             console.error('⚠️ Error al registrar modificación en auditoría:', auditErr.message);
             // No fallar la operación principal si falla la auditoría
@@ -269,7 +264,6 @@ router.delete('/events/:id', async (req, res) => {
                 ['evento', operador, `Evento eliminado: ${eventoEliminado.titulo}`,
                     `Zona: ${zonaNombre}. UV: ${eventoEliminado.uv_afectada || 'N/A'}. Fecha del corte: ${eventoEliminado.fecha}. Eliminado por: ${operador}`]
             );
-            console.log('✅ Eliminación de evento registrada en auditoría');
         } catch (auditErr) {
             console.error('⚠️ Error al registrar eliminación en auditoría:', auditErr.message);
             // No fallar la operación principal si falla la auditoría
@@ -287,12 +281,10 @@ router.delete('/events/:id', async (req, res) => {
 // Obtener historial de auditoría
 router.get('/audit-history', async (req, res) => {
     try {
-        console.log('📋 API: Solicitando historial de auditoría...');
         const result = await db.query(`
             SELECT * FROM auditoria_eventos
             ORDER BY fecha_exac DESC
         `);
-        console.log(`✅ API: Retornando ${result.rows.length} registros de auditoría`);
         res.json({ success: true, data: result.rows });
     } catch (err) {
         console.error("❌ Error obteniendo historial de auditoría:", err.message);

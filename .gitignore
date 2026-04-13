@@ -24,6 +24,6 @@ npm-debug.log*
 *.swp
 *~
 
-# Backups y Archivos Temporales de Prueba
-db/backup_pre_cleanup_*.json
-test-api.js
+# Archive folders (archived unused code)
+db/archive/
+routes/archive/
