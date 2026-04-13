@@ -238,6 +238,28 @@ async function ensureDirectorioColumns() {
             await db.query('ALTER TABLE directorio ADD COLUMN internal_id VARCHAR(30) NOT NULL DEFAULT \'\'');
             console.log('✓ Columna internal_id agregada a directorio');
         }
+
+        // Agregar columna 'id_operador_creacion' si no existe
+        const opCreacionCheck = await db.query(`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name = 'directorio' AND column_name = 'id_operador_creacion'
+        `);
+        if (opCreacionCheck.rows.length === 0) {
+            await db.query('ALTER TABLE directorio ADD COLUMN id_operador_creacion INT REFERENCES operadores(id_operador) ON DELETE SET NULL');
+            await db.query('CREATE INDEX IF NOT EXISTS idx_directorio_operador_creacion ON directorio(id_operador_creacion)');
+            console.log('✓ Columna id_operador_creacion agregada a directorio');
+        }
+
+        // Agregar columna 'id_operador_actualizacion' si no existe
+        const opActualCheck = await db.query(`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name = 'directorio' AND column_name = 'id_operador_actualizacion'
+        `);
+        if (opActualCheck.rows.length === 0) {
+            await db.query('ALTER TABLE directorio ADD COLUMN id_operador_actualizacion INT REFERENCES operadores(id_operador) ON DELETE SET NULL');
+            await db.query('CREATE INDEX IF NOT EXISTS idx_directorio_operador_actualizacion ON directorio(id_operador_actualizacion)');
+            console.log('✓ Columna id_operador_actualizacion agregada a directorio');
+        }
     } catch (err) {
         console.error('✗ Error verificando columnas de directorio:', err.message);
     }

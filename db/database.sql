@@ -92,16 +92,22 @@ CREATE TABLE IF NOT EXISTS seguimientos (
 
 -- 11. directorio
 CREATE TABLE IF NOT EXISTS directorio (
-    id          SERIAL PRIMARY KEY,
-    nombre      VARCHAR(150) NOT NULL,
-    cargo       VARCHAR(100) NOT NULL,
-    area        VARCHAR(100) NOT NULL DEFAULT '',
-    gerencia    VARCHAR(100) NOT NULL DEFAULT '',
-    telefono    VARCHAR(30)  NOT NULL DEFAULT '',
-    internal_id VARCHAR(30)  NOT NULL DEFAULT '',
-    nota        TEXT,
-    avatar      TEXT
+    id                       SERIAL PRIMARY KEY,
+    nombre                   VARCHAR(150) NOT NULL,
+    cargo                    VARCHAR(100) NOT NULL,
+    area                     VARCHAR(100) NOT NULL DEFAULT '',
+    gerencia                 VARCHAR(100) NOT NULL DEFAULT '',
+    telefono                 VARCHAR(30)  NOT NULL DEFAULT '',
+    internal_id              VARCHAR(30)  NOT NULL DEFAULT '',
+    nota                     TEXT,
+    avatar                   TEXT,
+    id_operador_creacion     INT REFERENCES operadores(id_operador) ON DELETE SET NULL,
+    id_operador_actualizacion INT REFERENCES operadores(id_operador) ON DELETE SET NULL
 );
+
+-- Índices para consultas de auditoría en directorio
+CREATE INDEX IF NOT EXISTS idx_directorio_operador_creacion ON directorio(id_operador_creacion);
+CREATE INDEX IF NOT EXISTS idx_directorio_operador_actualizacion ON directorio(id_operador_actualizacion);
 
 -- 12. zonas (para los eventos/cortes programados)
 CREATE TABLE IF NOT EXISTS zonas (

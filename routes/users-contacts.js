@@ -288,17 +288,23 @@ router.get('/contacts', async (req, res) => {
     try {
         const result = await db.query(`
             SELECT
-                id,
-                nombre,
-                cargo,
-                gerencia,
-                area,
-                telefono,
-                internal_id,
-                nota,
-                avatar
-            FROM directorio
-            ORDER BY nombre ASC
+                d.id,
+                d.nombre,
+                d.cargo,
+                d.gerencia,
+                d.area,
+                d.telefono,
+                d.internal_id,
+                d.nota,
+                d.avatar,
+                d.id_operador_creacion,
+                d.id_operador_actualizacion,
+                oc.usuario as creado_por_usuario,
+                oa.usuario as actualizado_por_usuario
+            FROM directorio d
+            LEFT JOIN operadores oc ON d.id_operador_creacion = oc.id_operador
+            LEFT JOIN operadores oa ON d.id_operador_actualizacion = oa.id_operador
+            ORDER BY d.nombre ASC
         `);
 
         const contacts = result.rows.map(c => ({
@@ -310,7 +316,11 @@ router.get('/contacts', async (req, res) => {
             telefono: c.telefono || '',
             internal_id: c.internal_id || '',
             nota: c.nota || '',
-            avatar: c.avatar || ''
+            avatar: c.avatar || '',
+            id_operador_creacion: c.id_operador_creacion,
+            id_operador_actualizacion: c.id_operador_actualizacion,
+            creado_por: c.creado_por_usuario || null,
+            actualizado_por: c.actualizado_por_usuario || null
         }));
 
         res.json({ success: true, data: contacts });
@@ -323,7 +333,7 @@ router.get('/contacts', async (req, res) => {
 // Crear nuevo contacto
 router.post('/contacts', async (req, res) => {
     try {
-        const { nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar } = req.body;
+        const { nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar, id_operador_log } = req.body;
 
         if (!nombre || !cargo) {
             return res.status(400).json({
@@ -333,17 +343,17 @@ router.post('/contacts', async (req, res) => {
         }
 
         const result = await db.query(
-            `INSERT INTO directorio (nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [nombre, cargo, area || '', gerencia || '', telefono || '', internal_id || '', nota || null, avatar || null]
+            `INSERT INTO directorio (nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar, id_operador_creacion)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [nombre, cargo, area || '', gerencia || '', telefono || '', internal_id || '', nota || null, avatar || null, id_operador_log || null]
         );
 
         // Registrar en bitácora del sistema
         await logCreate({
             tabla: 'directorio',
-            operadorId: req.body.id_operador_log || null,
+            operadorId: id_operador_log || null,
             registroId: result.rows[0].id,
-            descripcion: `Contacto creado (API contacts): ${nombre} (${cargo})`,
+            descripcion: `Contacto creado: ${nombre} (${cargo})`,
             datosNuevos: result.rows[0],
             req
         });
@@ -359,7 +369,7 @@ router.post('/contacts', async (req, res) => {
 router.put('/contacts/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar } = req.body;
+        const { nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar, id_operador_log } = req.body;
 
         // Obtener datos anteriores
         const oldResult = await db.query('SELECT * FROM directorio WHERE id = $1', [id]);
@@ -367,9 +377,10 @@ router.put('/contacts/:id', async (req, res) => {
 
         const result = await db.query(
             `UPDATE directorio
-             SET nombre = $1, cargo = $2, area = $3, gerencia = $4, telefono = $5, internal_id = $6, nota = $7, avatar = $8
-             WHERE id = $9 RETURNING *`,
-            [nombre, cargo, area || '', gerencia || '', telefono || '', internal_id || '', nota || null, avatar || null, id]
+             SET nombre = $1, cargo = $2, area = $3, gerencia = $4, telefono = $5, 
+                 internal_id = $6, nota = $7, avatar = $8, id_operador_actualizacion = $9
+             WHERE id = $10 RETURNING *`,
+            [nombre, cargo, area || '', gerencia || '', telefono || '', internal_id || '', nota || null, avatar || null, id_operador_log || null, id]
         );
 
         if (result.rows.length === 0) {
@@ -379,9 +390,9 @@ router.put('/contacts/:id', async (req, res) => {
         // Registrar en bitácora del sistema
         await logUpdate({
             tabla: 'directorio',
-            operadorId: req.body.id_operador_log || null,
+            operadorId: id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Contacto actualizado (API contacts): ${nombre} (${cargo})`,
+            descripcion: `Contacto actualizado: ${nombre} (${cargo})`,
             datosNuevos: result.rows[0],
             datosAnteriores,
             req
@@ -415,7 +426,7 @@ router.delete('/contacts/:id', async (req, res) => {
             tabla: 'directorio',
             operadorId: id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Contacto eliminado (API contacts): ${datosAnteriores?.nombre || 'id=' + id}`,
+            descripcion: `Contacto eliminado: ${datosAnteriores?.nombre || 'id=' + id}`,
             datosAnteriores,
             req
         });
