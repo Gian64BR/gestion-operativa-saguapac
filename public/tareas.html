@@ -12,10 +12,8 @@
             if (!u || !r || u === '' || u === 'null' || u === 'undefined') {
                 localStorage.clear();
                 sessionStorage.setItem('redirectAfterLogin', location.href);
-                document.open();
-                document.write('<html><head><meta http-equiv="refresh" content="0;url=/index.html"></head><body></body></html>');
-                document.close();
-                return;
+                window.location.replace(window.location.origin + '/index.html');
+                throw new Error('No autorizado');
             }
         })();
     </script>
