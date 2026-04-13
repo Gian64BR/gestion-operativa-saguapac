@@ -26,6 +26,7 @@
     if (!userId || !userRole) {
         localStorage.clear();
         sessionStorage.setItem('redirectAfterLogin', currentPath);
+        window.stop(); // Detener carga de la página actual
         window.location.replace('/index.html');
         return;
     }
@@ -33,17 +34,9 @@
     // Validar que la sesión no esté corrupta (valores vacíos)
     if (userId === '' || userId === 'null' || userId === 'undefined') {
         localStorage.clear();
+        window.stop();
         window.location.replace('/index.html');
         return;
-    }
-
-    // Detener carga adicional del DOM para evitar que scripts posteriores se ejecuten
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            document.body.style.display = 'none';
-        });
-    } else {
-        document.body.style.display = 'none';
     }
 
 })();
