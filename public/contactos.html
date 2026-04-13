@@ -5,6 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contactos Internos - Cooperativa de Agua</title>
+    <!-- PROTECCIÓN DE RUTA: Validar sesión antes de renderizar -->
+    <script>
+        (function () {
+            var u = localStorage.getItem('userId'), r = localStorage.getItem('userRole');
+            if (!u || !r || u === '' || u === 'null' || u === 'undefined') {
+                localStorage.clear();
+                sessionStorage.setItem('redirectAfterLogin', location.href);
+                document.open();
+                document.write('<html><head><meta http-equiv="refresh" content="0;url=/index.html"></head><body></body></html>');
+                document.close();
+                return;
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="modules.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
