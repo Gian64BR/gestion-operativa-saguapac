@@ -630,7 +630,7 @@ window.mostrarInfo = function () {
 // ============================================================
 function renderFormBase(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — En Base (8.01)')}
+    ${mkHeader('En Base (8.01)')}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">
         ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
         ${mkGroup('Consumo normal (m³)', '<input type="number" id="baseNormal" class="form-input" placeholder="Ej. 20" oninput="calcBaseRealtime()">')}
@@ -750,7 +750,7 @@ window.ejecutarBase = function () {
 // ============================================================
 function renderForm801(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Arreglo de fuga (8.01)')}
+    ${mkHeader('Arreglo de fuga (8.01)')}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">
         ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
         <div></div>
@@ -790,7 +790,7 @@ function renderForm801(container) {
 // ============================================================
 function renderForm802(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Promedio Elevado (8.02)')}
+    ${mkHeader('Promedio elevado (8.02)')}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">
         ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
         <div></div>
@@ -853,7 +853,7 @@ window.ejecutar802 = function () {
 // ============================================================
 function renderForm803(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Cambio de medidor (8.03)')}
+    ${mkHeader('Cambio de medidor (8.03)')}
     <div id="diasWarningAlert803" style="display:none;padding:0.8rem;border-radius:8px;margin-bottom:1rem;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">
         ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
@@ -926,7 +926,7 @@ window.ejecutar803 = function () {
 // ============================================================
 function renderForm804(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Mala lectura (8.04)')}
+    ${mkHeader('Mala lectura (8.04)')}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">
         ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
         <div></div>
@@ -962,7 +962,7 @@ window.ejecutar804 = function () {
 // ============================================================
 function renderForm806(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Cambio de categoría (8.06)')}
+    ${mkHeader('Cambio de categoría (8.06)')}
     ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
     <br>
     <h4 style="color:var(--color-sidebar);margin-bottom:0.5rem;">Meses a revisar</h4>
@@ -1049,7 +1049,7 @@ window.ejecutar806 = function () {
 // ============================================================
 function renderForm807(container) {
     container.innerHTML = `
-    ${mkHeader('Calculadora — Purga de instalación (8.07)')}
+    ${mkHeader('Purga de instalación (8.07)')}
     ${mkGroup('Código del asociado', mkCodigoInput('codSocio', 'Ingresa 9 dígitos'))}
     <br>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;border-bottom:1px solid var(--color-border);padding-bottom:2rem;margin-bottom:2rem;">

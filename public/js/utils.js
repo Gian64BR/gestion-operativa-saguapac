@@ -906,6 +906,8 @@ document.addEventListener('click', (e) => {
 
 function injectGlobalModals() {
     if (document.getElementById('profileModal')) return; // Already injected or hardcoded
+    
+    const adminMode = isAdmin();
 
     const modalsHTML = `
         <!-- Modal Editar Perfil -->
@@ -919,7 +921,7 @@ function injectGlobalModals() {
                     <!-- Información del usuario -->
                     <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
                         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-                            <div class="profile-avatar" id="modalAvatar" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;background:var(--color-accent-teal);color:white;">A</div>
+                            <div class="profile-avatar" id="modalAvatar" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;background:var(--color-accent-teal);color:white;min-width:40px;min-height:40px;flex-shrink:0;">A</div>
                             <div>
                                 <div style="font-weight:600;color:var(--color-text-dark);" id="modalUserName">Administrador</div>
                                 <div style="font-size:0.8rem;color:var(--color-text-muted);" id="modalUserRole">Administrador</div>
@@ -952,6 +954,7 @@ function injectGlobalModals() {
                     </div>
 
                     <!-- Cambiar contraseña -->
+                    ${adminMode ? `
                     <div style="border-top:1px solid var(--color-border);padding-top:1rem;margin-top:1rem;">
                         <h4 style="margin-bottom:0.75rem;font-size:0.9rem;color:var(--color-text-dark);">🔐 Cambiar contraseña</h4>
                         <div class="form-group" style="margin-bottom: 0.75rem;">
@@ -963,6 +966,7 @@ function injectGlobalModals() {
                             <input type="password" id="editNewPassword" class="form-input" placeholder="saguapac + mínimo 4 números" style="width:100%; padding:0.7rem; border:1px solid var(--color-border); border-radius:8px; background-color:white;">
                         </div>
                     </div>
+                    ` : ''}
 
                     <button onclick="saveProfileChanges()" style="width:100%; background:var(--color-accent-teal); color:white; padding:0.8rem; border-radius:8px; border:none; font-weight:600; cursor:pointer; margin-top:0.5rem;" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">Guardar cambios</button>
                     <p id="profileSaveFeedback" style="display:none; color:#10b981; font-size:0.85rem; margin-top:0.8rem; text-align:center;">¡Cambios guardados con éxito!</p>

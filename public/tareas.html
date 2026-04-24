@@ -7,13 +7,16 @@
     <title>Tareas Operativas - Cooperativa de Agua</title>
     <!-- PROTECCIÓN DE RUTA: Validar sesión antes de renderizar -->
     <script>
+        document.documentElement.style.display = 'none';
         (function () {
             var u = localStorage.getItem('userId'), r = localStorage.getItem('userRole');
             if (!u || !r || u === '' || u === 'null' || u === 'undefined') {
                 localStorage.clear();
                 sessionStorage.setItem('redirectAfterLogin', location.href);
-                window.location.replace(window.location.origin + '/index.html');
-                throw new Error('No autorizado');
+                window.stop();
+                window.location.replace('/index.html');
+            } else {
+                document.documentElement.style.display = '';
             }
         })();
     </script>
@@ -64,7 +67,7 @@
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
             </div>
-            <div class="nav-item" style="margin-top: auto;" onclick="window.location.href='index.html'"
+            <div class="nav-item" style="margin-top: auto;" onclick="logout()"
                 title="Cerrar Sesión">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
@@ -114,7 +117,7 @@
                 </svg>
                 <span>Historial</span>
             </button>
-            <button class="mobile-nav-item" onclick="window.location.href='index.html'">
+            <button class="mobile-nav-item" onclick="logout()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -137,7 +140,7 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input type="text" id="globalSearchInput" placeholder="Buscar coincidencia (Ejemplo: UV 01)"
-                        autocomplete="off" data-lpignore="true" data-form-type="other">
+                        autocomplete="new-password" data-lpignore="true" data-form-type="other">
                     <div id="searchResultsDropdown" class="search-results-dropdown" style="display: none;"></div>
                 </div>
 

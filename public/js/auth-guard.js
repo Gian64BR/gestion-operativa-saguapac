@@ -39,4 +39,16 @@
         return;
     }
 
+    // Proteger contra recuperación desde caché del navegador (bfcache) al usar el botón "Atrás"
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            const u = localStorage.getItem('userId');
+            const r = localStorage.getItem('userRole');
+            if (!u || !r || u === '' || u === 'null' || u === 'undefined') {
+                localStorage.clear();
+                window.location.replace('/index.html');
+            }
+        }
+    });
+
 })();

@@ -111,16 +111,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Eventos de hoy van a "Programados para hoy"
                 console.log(`   → Va a "Programados para hoy"`);
                 cutsToday.push(e);
-            } else if (eventDate > todayStart && eventDate <= monthAhead && esProgramado) {
+            } else if (eventDate > todayStart && eventDate <= monthAhead) {
                 // Eventos futuros dentro de los próximos 30 días van a "Programados del mes"
                 console.log(`   → Va a "Programados del mes" (futuro: ${eventDate.toLocaleDateString()})`);
                 cutsMonth.push(e);
-            } else if (eventDate >= monthAgo && eventDate < todayStart && esCompletado) {
-                // Eventos pasados dentro de los últimos 30 días que están completados van a "Realizados del mes"
+            } else if (eventDate >= monthAgo && eventDate < todayStart) {
+                // Eventos pasados dentro de los últimos 30 días van a "Realizados del mes"
                 console.log(`   → Va a "Realizados del mes" (pasado: ${eventDate.toLocaleDateString()})`);
                 cutsCompletedMonth.push(e);
-            } else if (eventDate < todayStart && !esCompletado) {
-                console.log(`   → NO se muestra: es pasado pero NO está completado (estado: ${estado})`);
+            } else if (eventDate < monthAgo) {
+                console.log(`   → NO se muestra en el panel: superó los 30 días de antigüedad`);
             } else if (eventDate > monthAhead) {
                 console.log(`   → NO se muestra: es muy futuro (> 30 días)`);
             }
