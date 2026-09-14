@@ -159,6 +159,20 @@ async function logPasswordChange({ operadorId, registroId, descripcion, req }) {
     });
 }
 
+/**
+ * Helper para registrar el ingreso a un módulo/página (navegación).
+ */
+async function logView({ operadorId, modulo, ruta, req }) {
+    await logSistema({
+        tabla: 'navegacion',
+        accion: 'VIEW',
+        operadorId,
+        descripcion: `Ingresó a: ${modulo || ruta || 'módulo desconocido'}`,
+        datosNuevos: { modulo: modulo || null, ruta: ruta || null },
+        req
+    });
+}
+
 module.exports = {
     logSistema,
     logCreate,
@@ -166,5 +180,6 @@ module.exports = {
     logDelete,
     logLogin,
     logLogout,
-    logPasswordChange
+    logPasswordChange,
+    logView
 };

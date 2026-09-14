@@ -11,7 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/connection');
-const { logSistema } = require('../db/log-sistema');
+const { logSistema, logView } = require('../db/log-sistema');
 
 // Mapa de tablas con borrado lógico: nombre de tabla -> columna PK y etiqueta legible
 const TABLAS_PAPELERA = {
@@ -42,7 +42,11 @@ function resumirRegistro(tabla, fila) {
 router.get('/audit-system', async (req, res) => {
     try {
         const { accion, tabla, desde, hasta, search } = req.query;
-        const limit = Math.min(parseInt(req.query.limit) || 500, 2000);
+
+        // Paginación: 50 registros por página por defecto
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 200);
+        const offset = (page - 1) * limit;
 
         const where = [];
         const params = [];
@@ -72,6 +76,15 @@ router.get('/audit-system', async (req, res) => {
 
         const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
 
+        // Total de registros que cumplen el filtro (para la paginación)
+        const countResult = await db.query(`
+            SELECT COUNT(*) FROM auditoria_sistema a
+            LEFT JOIN operadores o ON a.id_operador = o.id_operador
+            ${whereClause}
+        `, params);
+        const total = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(total / limit) || 1;
+
         const result = await db.query(`
             SELECT
                 a.id_auditoria,
@@ -90,8 +103,8 @@ router.get('/audit-system', async (req, res) => {
             LEFT JOIN operadores o ON a.id_operador = o.id_operador
             ${whereClause}
             ORDER BY a.fecha_exac DESC
-            LIMIT ${limit}
-        `, params);
+            LIMIT $${i} OFFSET $${i + 1}
+        `, [...params, limit, offset]);
 
         // Catálogos para los filtros del frontend
         const acciones = await db.query('SELECT DISTINCT accion FROM auditoria_sistema ORDER BY accion');
@@ -100,6 +113,12 @@ router.get('/audit-system', async (req, res) => {
         res.json({
             success: true,
             data: result.rows,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            },
             catalogos: {
                 acciones: acciones.rows.map(r => r.accion),
                 tablas: tablas.rows.map(r => r.tabla_origen)
@@ -107,6 +126,25 @@ router.get('/audit-system', async (req, res) => {
         });
     } catch (err) {
         console.error('Error obteniendo bitácora del sistema:', err.message);
+        res.status(500).json({ success: false, message: 'Error BD: ' + err.message });
+    }
+});
+
+// ==================== REGISTRAR INGRESO A UN MÓDULO ====================
+
+// El frontend lo llama en cada carga de página para dejar rastro en la bitácora
+router.post('/audit-view', async (req, res) => {
+    try {
+        const { id_operador, modulo, ruta } = req.body || {};
+        await logView({
+            operadorId: id_operador || null,
+            modulo,
+            ruta,
+            req
+        });
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error registrando ingreso a módulo:', err.message);
         res.status(500).json({ success: false, message: 'Error BD: ' + err.message });
     }
 });

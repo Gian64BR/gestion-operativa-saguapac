@@ -139,6 +139,33 @@
             color: #475569;
         }
 
+        .bit-page {
+            padding: 0.35rem 0.7rem;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .bit-page:hover:not(:disabled):not(.active) {
+            border-color: #0088cc;
+            color: #0088cc;
+        }
+
+        .bit-page.active {
+            background: #0088cc;
+            border-color: #0088cc;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .bit-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         table.bit-table {
             width: 100%;
             border-collapse: collapse;
@@ -210,6 +237,11 @@
         .badge-RESTORE {
             background: #ede9fe;
             color: #5b21b6;
+        }
+
+        .badge-VIEW {
+            background: #e0e7ff;
+            color: #3730a3;
         }
 
         .bit-empty {
@@ -317,7 +349,7 @@
                     <label for="fHasta">Hasta</label>
                     <input type="date" id="fHasta">
                 </div>
-                <button class="btn-bit" onclick="loadMovimientos()">Filtrar</button>
+                <button class="btn-bit" onclick="aplicarFiltros()">Filtrar</button>
                 <button class="btn-bit ghost" onclick="resetFiltros()">Limpiar</button>
             </div>
 

@@ -20,6 +20,18 @@
         return;
     }
 
+    // ---------- Registrar ingreso a la bitácora ----------
+    (function () {
+        const userId = parseInt(localStorage.getItem('userId')) || null;
+        try {
+            fetch('/api/audit-view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_operador: userId, modulo: 'Bitácora del Sistema', ruta: '/bitacora.html' })
+            }).catch(function () { });
+        } catch (e) { /* nunca bloquear por la bitácora */ }
+    })();
+
     // ---------- Utilidades ----------
     async function fetchJSON(url, options) {
         const res = await fetch(url, {
@@ -65,6 +77,38 @@
     let catalogosCargados = false;
     let movRows = [];
     let papRows = [];
+    const PAGE_SIZE = 50;
+    let movPage = 1;
+    let papPage = 1;
+
+    // ---------- Paginación (HTML reutilizable) ----------
+    function paginacionHTML(total, totalPages, current, fnName) {
+        if (totalPages <= 1) {
+            return `<div style="margin-top:0.8rem; color:#94a3b8; font-size:0.78rem;">${total} registro(s).</div>`;
+        }
+
+        const inicio = total === 0 ? 0 : (current - 1) * PAGE_SIZE + 1;
+        const fin = Math.min(current * PAGE_SIZE, total);
+
+        let botones = '';
+        for (let p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || Math.abs(p - current) <= 2) {
+                botones += `<button class="bit-page ${p === current ? 'active' : ''}" onclick="${fnName}(${p})">${p}</button>`;
+            } else if (Math.abs(p - current) === 3) {
+                botones += `<span style="color:#94a3b8;">…</span>`;
+            }
+        }
+
+        return `
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:0.8rem;">
+                <span style="color:#64748b; font-size:0.8rem;">Mostrando ${inicio}–${fin} de ${total} registro(s)</span>
+                <div style="display:flex; gap:0.3rem; align-items:center; flex-wrap:wrap;">
+                    <button class="bit-page" ${current <= 1 ? 'disabled' : ''} onclick="${fnName}(${current - 1})">‹ Anterior</button>
+                    ${botones}
+                    <button class="bit-page" ${current >= totalPages ? 'disabled' : ''} onclick="${fnName}(${current + 1})">Siguiente ›</button>
+                </div>
+            </div>`;
+    }
 
     // ---------- Movimientos ----------
     async function loadMovimientos() {
@@ -83,10 +127,13 @@
         if (search) params.set('search', search);
         if (desde) params.set('desde', desde);
         if (hasta) params.set('hasta', hasta + 'T23:59:59');
+        params.set('page', movPage);
+        params.set('limit', PAGE_SIZE);
 
         try {
             const response = await fetchJSON('/api/audit-system?' + params.toString());
             const rows = response.data || [];
+            const pag = response.pagination || { page: 1, total: rows.length, totalPages: 1 };
             movRows = rows;
 
             if (!catalogosCargados && response.catalogos) {
@@ -126,11 +173,23 @@
                         <tbody>${filas}</tbody>
                     </table>
                 </div>
-                <div style="margin-top:0.6rem; color:#94a3b8; font-size:0.78rem;">${rows.length} registro(s). Haz clic en una fila para ver el detalle.</div>`;
+                ${paginacionHTML(pag.total, pag.totalPages, pag.page, 'irPaginaMov')}
+                <div style="margin-top:0.4rem; color:#94a3b8; font-size:0.78rem;">Haz clic en una fila para ver el detalle.</div>`;
         } catch (err) {
             container.innerHTML = `<div class="bit-empty" style="color:#dc2626;">Error: ${escapeHtml(err.message)}</div>`;
         }
     }
+
+    window.irPaginaMov = function (p) {
+        movPage = p;
+        loadMovimientos();
+        document.getElementById('view-movimientos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    window.aplicarFiltros = function () {
+        movPage = 1;
+        loadMovimientos();
+    };
 
     function fillSelect(id, valores) {
         const sel = document.getElementById(id);
@@ -193,15 +252,31 @@
 
         try {
             const response = await fetchJSON('/api/bitacora/papelera');
-            const rows = response.data || [];
-            papRows = rows;
+            papRows = response.data || [];
+            papPage = 1;
+            renderPapeleraPage();
+        } catch (err) {
+            container.innerHTML = `<div class="bit-empty" style="color:#dc2626;">Error: ${escapeHtml(err.message)}</div>`;
+        }
+    }
 
-            if (rows.length === 0) {
-                container.innerHTML = '<div class="bit-empty">No hay registros eliminados.</div>';
-                return;
-            }
+    function renderPapeleraPage() {
+        const container = document.getElementById('papeleraContainer');
 
-            const filas = rows.map((r, idx) => `
+        if (papRows.length === 0) {
+            container.innerHTML = '<div class="bit-empty">No hay registros eliminados.</div>';
+            return;
+        }
+
+        const total = papRows.length;
+        const totalPages = Math.ceil(total / PAGE_SIZE);
+        if (papPage > totalPages) papPage = totalPages;
+        const start = (papPage - 1) * PAGE_SIZE;
+        const pageData = papRows.slice(start, start + PAGE_SIZE);
+
+        const filas = pageData.map((r, i) => {
+            const idx = start + i;
+            return `
                 <tr>
                     <td style="white-space:nowrap;">${fmtFecha(r.deleted_at)}</td>
                     <td>${escapeHtml(r.tabla_label)}</td>
@@ -212,28 +287,32 @@
                             Restaurar
                         </button>
                     </td>
-                </tr>`).join('');
+                </tr>`;
+        }).join('');
 
-            container.innerHTML = `
-                <div style="overflow:auto; max-height:65vh;">
-                    <table class="bit-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha de eliminación</th>
-                                <th>Tabla</th>
-                                <th>Registro</th>
-                                <th>Eliminado por</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>${filas}</tbody>
-                    </table>
-                </div>
-                <div style="margin-top:0.6rem; color:#94a3b8; font-size:0.78rem;">${rows.length} registro(s) en la papelera.</div>`;
-        } catch (err) {
-            container.innerHTML = `<div class="bit-empty" style="color:#dc2626;">Error: ${escapeHtml(err.message)}</div>`;
-        }
+        container.innerHTML = `
+            <div style="overflow:auto; max-height:65vh;">
+                <table class="bit-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha de eliminación</th>
+                            <th>Tabla</th>
+                            <th>Registro</th>
+                            <th>Eliminado por</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>
+            ${paginacionHTML(total, totalPages, papPage, 'irPaginaPap')}`;
     }
+
+    window.irPaginaPap = function (p) {
+        papPage = p;
+        renderPapeleraPage();
+        document.getElementById('view-papelera').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     window.restaurarIdx = function (idx) {
         const r = papRows[idx];
@@ -263,10 +342,13 @@
         document.getElementById('fTabla').value = '';
         document.getElementById('fDesde').value = '';
         document.getElementById('fHasta').value = '';
+        movPage = 1;
         loadMovimientos();
     };
 
     window.loadBitacora = function () {
+        movPage = 1;
+        papPage = 1;
         loadMovimientos();
         loadPapelera();
     };
@@ -287,7 +369,7 @@
 
         // Enter en el buscador
         document.getElementById('fSearch').addEventListener('keydown', e => {
-            if (e.key === 'Enter') loadMovimientos();
+            if (e.key === 'Enter') aplicarFiltros();
         });
 
         loadMovimientos();

@@ -39,6 +39,31 @@
         return;
     }
 
+    // Registrar el ingreso al módulo en la bitácora (acción VIEW)
+    (function registrarIngreso() {
+        const MODULOS = {
+            '/dashboard.html': 'Panel Principal',
+            '/contactos.html': 'Directorio de Contactos',
+            '/solicitudes.html': 'Gestión de Solicitudes',
+            '/tareas.html': 'Gestión de Tareas Operativas',
+            '/historial.html': 'Historial y Auditoría Global',
+            '/bitacora.html': 'Bitácora del Sistema'
+        };
+        const modulo = MODULOS[pathName] || pathName;
+
+        try {
+            fetch('/api/audit-view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_operador: parseInt(userId) || null,
+                    modulo,
+                    ruta: currentPath
+                })
+            }).catch(function () { });
+        } catch (e) { /* nunca bloquear la navegación por la bitácora */ }
+    })();
+
     // Proteger contra recuperación desde caché del navegador (bfcache) al usar el botón "Atrás"
     window.addEventListener('pageshow', function (event) {
         if (event.persisted) {
