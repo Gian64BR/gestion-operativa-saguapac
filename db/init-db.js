@@ -7,6 +7,8 @@
  */
 
 const db = require('./connection');
+const fs = require('fs');
+const path = require('path');
 
 async function ensureOperadoresColumns() {
     try {
@@ -290,6 +292,18 @@ async function ensureForeignKeyEventos() {
 
 async function initDatabase() {
     console.log('🔄 Inicializando base de datos...');
+    try {
+        const sqlPath = path.join(__dirname, 'database.sql');
+        if (fs.existsSync(sqlPath)) {
+            console.log('📖 Leyendo archivo database.sql para estructura inicial...');
+            const sql = fs.readFileSync(sqlPath, 'utf8');
+            await db.query(sql);
+            console.log('✓ Estructura de database.sql aplicada con éxito');
+        }
+    } catch (err) {
+        console.error('✗ Error al aplicar database.sql:', err.message);
+    }
+    
     await ensureOperadoresColumns();
     await ensureZonasTable();
     await ensureEventosTable();

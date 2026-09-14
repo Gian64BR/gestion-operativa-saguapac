@@ -22,12 +22,14 @@ const authRoutes = require('./routes/auth');
 const usersContactsRoutes = require('./routes/users-contacts');
 const eventosZonasRoutes = require('./routes/eventos-zonas');
 const dashboardStatsRoutes = require('./routes/dashboard-stats');
+const solicitudesRoutes = require('./routes/solicitudes');
 
 // Montando todas las rutas de API
 app.use('/api', authRoutes);
 app.use('/api', usersContactsRoutes);
 app.use('/api', eventosZonasRoutes);
 app.use('/api', dashboardStatsRoutes);
+app.use('/api', solicitudesRoutes);
 
 // Ruta de prueba para verificar que la API está funcionando
 app.get('/api', (req, res) => {
@@ -38,6 +40,7 @@ app.get('/api', (req, res) => {
             auth: '/api/login, /api/register, /api/logout, /api/heartbeat',
             users: '/api/users (CRUD operadores)',
             contacts: '/api/contacts (directorio)',
+            solicitudes: '/api/solicitudes (CRUD completo)',
             events: '/api/events (cortes programados)',
             zones: '/api/zonas',
             auditHistory: '/api/audit-history',

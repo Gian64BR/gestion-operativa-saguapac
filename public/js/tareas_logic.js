@@ -201,7 +201,8 @@ async function saveToAudit(record) {
 // formulaHtml = inner HTML for the left side (can use <br>, <b> etc)
 // finalText = boxed result label e.g. '22 m³ / 8.01'
 // datosCompletos = object with all calculation fields for persistence
-function showResult(formulaHtml, finalText, resultado, codSocio, datosCompletos) {
+// id_estado = 1 (Pendiente) por defecto, 4 (No procedente) si no es procedente
+function showResult(formulaHtml, finalText, resultado, codSocio, datosCompletos, id_estado) {
     const box = document.getElementById('finalResultBox');
     const formula = document.getElementById('resultFormula');
     const fin = document.getElementById('resultFinalBox');
@@ -223,10 +224,7 @@ function showResult(formulaHtml, finalText, resultado, codSocio, datosCompletos)
     };
 
     // Guardar en auditoría en segundo plano sin bloquear la UI
-    // Usamos .then() sin await para no bloquear la interfaz
     saveToAudit(record).then((response) => {
-        // Capture the REAL database ID from the server response (SERIAL auto-increment)
-        // so that subsequent recalculations UPSERT the same row instead of creating duplicates
         if (response && response.data && response.data.id) {
             currentAuditRecord = String(response.data.id);
         } else {
@@ -235,6 +233,11 @@ function showResult(formulaHtml, finalText, resultado, codSocio, datosCompletos)
     }).catch(err => {
         console.error('Error al guardar auditoría (segundo plano):', err);
     });
+
+    // AUTO-CREAR SOLICITUD para cualquier tarea operativa, sea procedente o no
+    if (codSocio && codSocio !== 'Sin código') {
+        autoCrearSolicitud(codSocio, resultado, id_estado);
+    }
 }
 
 // ============================================================
@@ -734,14 +737,22 @@ window.ejecutarBase = function () {
         </div>`;
     }
 
-    showResult(formulaHtml, `${resultado} m³ / 8.01`, resultado, codSocio);
-
-    // Per-month evaluation using the elevated months entered by the user
+    // Determinar estado de solicitud
     const selects = document.querySelectorAll('.base-mes-sel');
     const mesesParaEval = elevadosInputs.map((v, i) => ({
         mes: selects[i]?.value || `Mes ${i + 1}`,
         consumo: v
     }));
+    let estadoSolicitud = 3;
+    const todasReducciones = mesesParaEval.map(m => customRound(m.consumo - resultado));
+    const todasImprocedentes = todasReducciones.every(r => r < 6);
+    if (todasImprocedentes) {
+        estadoSolicitud = 4;
+    }
+
+    showResult(formulaHtml, `${resultado} m³ / 8.01`, resultado, codSocio, null, estadoSolicitud);
+
+    // Per-month evaluation using the elevated months entered by the user
     evaluarReduccionPorFactura(resultado, mesesParaEval);
 };
 
@@ -1042,6 +1053,11 @@ window.ejecutar806 = function () {
             </div>`;
         theBox.style.display = 'block';
     }
+
+    // AUTO-CREAR SOLICITUD para cambio de categoría
+    if (codSocio && codSocio !== 'Sin código') {
+        autoCrearSolicitud(codSocio, 0);
+    }
 };
 
 // ============================================================
@@ -1091,6 +1107,46 @@ window.ejecutar807 = function () {
         </div>`;
     showResult(formulaHtml, `${resultado} m³ / 8.07`, resultado, codSocio);
 };
+
+// ============================================================
+// AUTO-CREACIÓN DE SOLICITUD DESDE TAREAS
+// ============================================================
+
+const TIPO_SOLICITUD_MAP = {
+    'base': 'En Base (8.01)',
+    '8.01': 'Arreglo de fuga (8.01)',
+    '8.02': 'Promedio Elevado (8.02)',
+    '8.03': 'Cambio de medidor (8.03)',
+    '8.04': 'Mala lectura (8.04)',
+    '8.06': 'Cambio de categoría (8.06)',
+    '8.07': 'Purga de instalación (8.07)'
+};
+
+async function autoCrearSolicitud(codSocio, resultadoFinal, id_estado) {
+    try {
+        const tipoNombre = TIPO_SOLICITUD_MAP[currentProcId] || 'En Base (8.01)';
+        const userId = localStorage.getItem('userId');
+
+        const esProcedente = id_estado === 3;
+        const descripcion = esProcedente
+            ? `La solicitud se hará verificar con la sesión de facturación y estará autorizada en un plazo máximo de 24 a 48 horas. Resultado: ${resultadoFinal} m³.`
+            : `La solicitud no fue procedente. Se le explica al usuario para que tenga en cuenta que su factura continuará con el monto que tenía.`;
+
+        await apiFetch('/api/solicitudes', {
+            method: 'POST',
+            body: JSON.stringify({
+                codigo_asociado: codSocio,
+                tipo_nombre: tipoNombre,
+                id_estado: id_estado || 3,
+                descripcion: descripcion,
+                id_operador_log: userId ? parseInt(userId) : null,
+                id_operador: userId ? parseInt(userId) : null
+            })
+        });
+    } catch (err) {
+        console.error('Error al crear solicitud automática:', err);
+    }
+}
 
 // ============================================================
 // 8.01 FUGA — CÁLCULO COMPLETO
@@ -1203,10 +1259,9 @@ window.ejecutarCalculoFinal = function () {
     const consumoFuga = customRound(rawFuga);
     if (consumoFuga <= 5) {
         if (alertEl) {
-            alertEl.style.cssText = 'display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:0.9rem 1rem;border-radius:8px;margin-bottom:1rem;font-weight:500;';
-            alertEl.innerHTML = `&#x274C; <strong>No procede.</strong> El consumo de fuga calculado es <strong>${consumoFuga} m&sup3;</strong> (m&iacute;nimo requerido: m&aacute;s de 5 m&sup3;).`;
+            alertEl.style.cssText = 'display:block;background:#fefce8;color:#854d0e;border:1px solid #fde68a;padding:0.9rem 1rem;border-radius:8px;margin-bottom:1rem;font-weight:500;';
+            alertEl.innerHTML = `&#x26A0;&#xFE0F; <strong>Advertencia:</strong> El consumo de fuga calculado es <strong>${consumoFuga} m&sup3;</strong>, pero se continuar&aacute; con el c&aacute;lculo combin&aacute;ndolo con el Promedio C2.`;
         }
-        return;
     }
     const C2 = calcularPromedioRealtime();
     if (C2 === 0) {
@@ -1271,7 +1326,17 @@ window.ejecutarCalculoFinal = function () {
         mesesAltos: mesesAltos.map((m, i) => ({ mes: m.mes, consumo: m.consumo, reduccion: customRound(m.consumo - resultadoFinal) }))
     };
 
-    showResult(formulaHtml, `${resultadoFinal} m³ / 8.01`, resultadoFinal, codSocio, datosCompletos);
+    // ---- DETERMINAR ESTADO DE SOLICITUD ----
+    let estadoSolicitud = 3;
+    if (mesesAltos.length > 0) {
+        const todasReducciones = mesesAltos.map(m => customRound(m.consumo - resultadoFinal));
+        const todasImprocedentes = todasReducciones.every(r => r < 6);
+        if (todasImprocedentes) {
+            estadoSolicitud = 4;
+        }
+    }
+
+    showResult(formulaHtml, `${resultadoFinal} m³ / 8.01`, resultadoFinal, codSocio, datosCompletos, estadoSolicitud);
 
     let reduccionBox = document.getElementById('reduccionMesesBox');
     if (!reduccionBox) {

@@ -32,3 +32,6 @@ npm-debug.log*
 # Archive folders (archived unused code)
 db/archive/
 routes/archive/
+
+# Local startup scripts (machine-specific)
+iniciar.bat
