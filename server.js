@@ -23,6 +23,7 @@ const usersContactsRoutes = require('./routes/users-contacts');
 const eventosZonasRoutes = require('./routes/eventos-zonas');
 const dashboardStatsRoutes = require('./routes/dashboard-stats');
 const solicitudesRoutes = require('./routes/solicitudes');
+const bitacoraRoutes = require('./routes/bitacora');
 
 // Montando todas las rutas de API
 app.use('/api', authRoutes);
@@ -30,6 +31,7 @@ app.use('/api', usersContactsRoutes);
 app.use('/api', eventosZonasRoutes);
 app.use('/api', dashboardStatsRoutes);
 app.use('/api', solicitudesRoutes);
+app.use('/api', bitacoraRoutes);
 
 // Ruta de prueba para verificar que la API está funcionando
 app.get('/api', (req, res) => {
@@ -44,6 +46,7 @@ app.get('/api', (req, res) => {
             events: '/api/events (cortes programados)',
             zones: '/api/zonas',
             auditHistory: '/api/audit-history',
+            bitacora: '/api/audit-system, /api/bitacora/papelera, /api/bitacora/restaurar',
             dashboard: '/api/dashboard/stats',
             validatePassword: '/api/validate-current-password'
         }

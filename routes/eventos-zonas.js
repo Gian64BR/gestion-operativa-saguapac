@@ -40,6 +40,7 @@ router.get('/events', async (req, res) => {
                 e.updated_at
             FROM eventos e
             LEFT JOIN zonas z ON e.zona_id = z.id
+            WHERE e.deleted_at IS NULL
             ORDER BY e.fecha DESC, e.hora_inicio ASC
         `);
         res.json({ success: true, data: result.rows });
@@ -67,7 +68,7 @@ router.get('/events/:id', async (req, res) => {
                 z.nombre as zona_nombre
             FROM eventos e
             LEFT JOIN zonas z ON e.zona_id = z.id
-            WHERE e.id = $1
+            WHERE e.id = $1 AND e.deleted_at IS NULL
         `, [id]);
 
         if (result.rows.length === 0) {
@@ -153,14 +154,14 @@ router.put('/events/:id', async (req, res) => {
         const { titulo, detalle, fecha, hora_inicio, hora_fin, zona_id, uv_afectada, estado } = req.body;
 
         // Obtener datos anteriores
-        const oldResult = await db.query('SELECT * FROM eventos WHERE id = $1', [id]);
+        const oldResult = await db.query('SELECT * FROM eventos WHERE id = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
         const result = await db.query(
             `UPDATE eventos
              SET titulo = $1, detalle = $2, fecha = $3, hora_inicio = $4, hora_fin = $5,
                  zona_id = $6, uv_afectada = $7, estado = $8, updated_at = NOW()
-             WHERE id = $9 RETURNING *`,
+             WHERE id = $9 AND deleted_at IS NULL RETURNING *`,
             [titulo, detalle, fecha, hora_inicio, hora_fin, zona_id, uv_afectada, estado, id]
         );
 
@@ -218,16 +219,26 @@ router.put('/events/:id', async (req, res) => {
     }
 });
 
-// Eliminar evento
+// Eliminar evento (BORRADO LÓGICO — el registro se conserva en la base de datos)
 router.delete('/events/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Obtener datos antes de eliminar
-        const oldResult = await db.query('SELECT * FROM eventos WHERE id = $1', [id]);
+        // Obtener datos antes de "eliminar"
+        const oldResult = await db.query('SELECT * FROM eventos WHERE id = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
-        const result = await db.query('DELETE FROM eventos WHERE id = $1 RETURNING *', [id]);
+        if (!datosAnteriores) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+        }
+
+        const result = await db.query(
+            `UPDATE eventos
+             SET deleted_at = NOW(), deleted_by = $2, updated_at = NOW()
+             WHERE id = $1 AND deleted_at IS NULL
+             RETURNING *`,
+            [id, req.body.id_operador_log || null]
+        );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Evento no encontrado' });
@@ -240,7 +251,7 @@ router.delete('/events/:id', async (req, res) => {
             tabla: 'eventos',
             operadorId: req.body.id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Evento eliminado: ${eventoEliminado.titulo}`,
+            descripcion: `Evento eliminado (borrado lógico): ${eventoEliminado.titulo}`,
             datosAnteriores,
             req
         });

@@ -65,18 +65,50 @@ async function ensureSeedData() {
 
 ensureSeedData();
 
+/**
+ * Reglas automáticas de estado de las solicitudes (se evalúan al consultar):
+ *  - Al crearse: 'En proceso'.
+ *  - Si pasan 24h sin ninguna modificación: pasa a 'Procedente'.
+ *  - Si pasan 48h: se cierra como 'Cerrado - Procedente' o 'Cerrado - No procedente'
+ *    según el resultado que tuviera. Una vez cerrada ya no se puede editar.
+ */
+async function aplicarReglasEstado() {
+    try {
+        // Regla 24h: sin modificar desde su creación -> Procedente
+        await db.query(`
+            UPDATE solicitudes s
+            SET id_estado = (SELECT id FROM estados WHERE nombre = 'Procedente' ORDER BY id ASC LIMIT 1),
+                updated_at = NOW()
+            WHERE s.deleted_at IS NULL
+              AND s.fecha_registro <= NOW() - INTERVAL '24 hours'
+              AND s.fecha_registro > NOW() - INTERVAL '48 hours'
+              AND s.updated_at <= s.fecha_registro
+              AND s.id_estado IN (SELECT id FROM estados WHERE nombre IN ('En proceso', 'Pendiente'))
+        `);
+
+        // Regla 48h: cerrar respetando el resultado
+        await db.query(`
+            UPDATE solicitudes s
+            SET id_estado = CASE
+                    WHEN s.id_estado IN (SELECT id FROM estados WHERE nombre = 'No procedente')
+                        THEN (SELECT id FROM estados WHERE nombre = 'Cerrado - No procedente' ORDER BY id ASC LIMIT 1)
+                    ELSE (SELECT id FROM estados WHERE nombre = 'Cerrado - Procedente' ORDER BY id ASC LIMIT 1)
+                END,
+                updated_at = NOW()
+            WHERE s.deleted_at IS NULL
+              AND s.fecha_registro <= NOW() - INTERVAL '48 hours'
+              AND s.id_estado IN (SELECT id FROM estados WHERE nombre IN ('Pendiente', 'En proceso', 'Procedente', 'No procedente'))
+        `);
+    } catch (err) {
+        console.error('⚠️ Error aplicando reglas de estado:', err.message);
+    }
+}
+
 // GET /api/solicitudes - List with pagination and search
 router.get('/solicitudes', async (req, res) => {
     try {
-        // Auto-cerrado: solicitudes con más de 48 horas pasan a Cerrado
-        await db.query(`
-            UPDATE solicitudes s
-            SET id_estado = (SELECT id FROM estados WHERE nombre = 'Cerrado' ORDER BY id ASC LIMIT 1)
-            WHERE s.fecha_registro < NOW() - INTERVAL '48 hours'
-            AND s.id_estado IN (
-                SELECT id FROM estados WHERE nombre IN ('Procedente', 'No procedente')
-            )
-        `);
+        // Aplicar reglas automáticas de estado (24h -> Procedente, 48h -> Cerrado)
+        await aplicarReglasEstado();
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -85,7 +117,7 @@ router.get('/solicitudes', async (req, res) => {
         const estado = req.query.estado || '';
         const tipo = req.query.tipo || '';
 
-        let where = [];
+        let where = ['s.deleted_at IS NULL'];
         let params = [];
         let paramIdx = 1;
 
@@ -170,6 +202,7 @@ router.get('/solicitudes', async (req, res) => {
 // GET /api/solicitudes/:id
 router.get('/solicitudes/:id', async (req, res) => {
     try {
+        await aplicarReglasEstado();
         const { id } = req.params;
         const result = await db.query(`
             SELECT
@@ -190,7 +223,7 @@ router.get('/solicitudes/:id', async (req, res) => {
             JOIN operadores op ON s.id_operador = op.id_operador
             JOIN tipos_solicitud t ON s.id_tipo_solicitud = t.id
             JOIN estados e ON s.id_estado = e.id
-            WHERE s.id_solicitud = $1
+            WHERE s.id_solicitud = $1 AND s.deleted_at IS NULL
         `, [id]);
 
         if (result.rows.length === 0) {
@@ -260,7 +293,11 @@ router.post('/solicitudes', async (req, res) => {
 
         const operadorId = id_operador_log || (req.body.id_operador) || null;
 
-        const estadoFinal = id_estado || 1;
+        // REGLA: toda solicitud nueva se crea en estado 'En proceso'
+        const estadoResult = await db.query(
+            "SELECT id FROM estados WHERE nombre = 'En proceso' ORDER BY id ASC LIMIT 1"
+        );
+        const estadoFinal = estadoResult.rows[0]?.id || id_estado || 1;
 
         const result = await db.query(
             `INSERT INTO solicitudes (id_usuario, id_operador, id_tipo_solicitud, id_estado, descripcion)
@@ -297,6 +334,33 @@ router.put('/solicitudes/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Solicitud no encontrada' });
         }
 
+        // REGLA: una solicitud cerrada es de solo lectura
+        const estadoActualResult = await db.query(
+            `SELECT e.nombre FROM solicitudes s JOIN estados e ON s.id_estado = e.id WHERE s.id_solicitud = $1`,
+            [id]
+        );
+        const estadoActualNombre = estadoActualResult.rows[0]?.nombre || '';
+        if (/^cerrado/i.test(estadoActualNombre)) {
+            return res.status(403).json({
+                success: false,
+                message: `La solicitud está ${estadoActualNombre} y ya no puede editarse. Solo puede consultarse.`
+            });
+        }
+
+        // El estado solo puede cambiarse entre los permitidos manualmente
+        if (id_estado) {
+            const permitido = await db.query(
+                `SELECT id FROM estados WHERE id = $1 AND nombre IN ('En proceso', 'Procedente', 'No procedente')`,
+                [id_estado]
+            );
+            if (permitido.rows.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Estado no válido. Solo se permite En proceso, Procedente o No procedente.'
+                });
+            }
+        }
+
         let idUsuario = datosAnteriores.id_usuario;
         if (codigo_asociado) {
             const codigoLimpio = codigo_asociado.replace(/\D/g, '').slice(0, 9);
@@ -321,7 +385,7 @@ router.put('/solicitudes/:id', async (req, res) => {
 
         const result = await db.query(
             `UPDATE solicitudes
-             SET id_usuario = $1, id_tipo_solicitud = $2, id_estado = $3, descripcion = $4
+             SET id_usuario = $1, id_tipo_solicitud = $2, id_estado = $3, descripcion = $4, updated_at = NOW()
              WHERE id_solicitud = $5 RETURNING *`,
             [idUsuario, tipoFinal, estadoFinal, descFinal, id]
         );
@@ -343,26 +407,45 @@ router.put('/solicitudes/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/solicitudes/:id
+// DELETE /api/solicitudes/:id (BORRADO LÓGICO — el registro se conserva)
 router.delete('/solicitudes/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { id_operador_log } = req.body || {};
 
-        const oldResult = await db.query('SELECT * FROM solicitudes WHERE id_solicitud = $1', [id]);
+        const oldResult = await db.query('SELECT * FROM solicitudes WHERE id_solicitud = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
         if (!datosAnteriores) {
             return res.status(404).json({ success: false, message: 'Solicitud no encontrada' });
         }
 
-        await db.query('DELETE FROM solicitudes WHERE id_solicitud = $1', [id]);
+        // REGLA: solo un administrador puede eliminar solicitudes
+        if (id_operador_log) {
+            const opResult = await db.query(
+                'SELECT role FROM operadores WHERE id_operador = $1 AND deleted_at IS NULL',
+                [id_operador_log]
+            );
+            const rol = opResult.rows[0]?.role;
+            if (rol !== 'administrador' && rol !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Solo un administrador puede eliminar solicitudes' });
+            }
+        } else {
+            return res.status(403).json({ success: false, message: 'Solo un administrador puede eliminar solicitudes' });
+        }
+
+        await db.query(
+            `UPDATE solicitudes
+             SET deleted_at = NOW(), deleted_by = $2
+             WHERE id_solicitud = $1 AND deleted_at IS NULL`,
+            [id, id_operador_log || null]
+        );
 
         await logDelete({
             tabla: 'solicitudes',
             operadorId: id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Solicitud #${id} eliminada - Socio: ${datosAnteriores.id_usuario}`,
+            descripcion: `Solicitud #${id} eliminada (borrado lógico) - Socio: ${datosAnteriores.id_usuario}`,
             datosAnteriores,
             req
         });

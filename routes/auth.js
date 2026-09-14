@@ -62,6 +62,80 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Ruta para registro RÁPIDO de operadores (POST /api/register-quick)
+// Solo requiere: nombre completo + número de carnet (CI).
+// - usuario = CI
+// - contraseña = CI + iniciales del nombre y apellidos (ej. 8066913GBR)
+// - rol = operador
+router.post('/register-quick', async (req, res) => {
+    try {
+        const { fullName, documentId } = req.body;
+
+        if (!fullName || !documentId) {
+            return res.status(400).json({ success: false, message: 'El nombre completo y el carnet son obligatorios' });
+        }
+
+        // Normalizar carnet: solo dígitos
+        const ci = String(documentId).replace(/\D/g, '');
+        if (!ci) {
+            return res.status(400).json({ success: false, message: 'El número de carnet debe contener dígitos' });
+        }
+
+        // Generar contraseña: CI + iniciales del nombre y apellidos (sin acentos)
+        const palabras = String(fullName).trim().replace(/\s+/g, ' ').split(' ').filter(Boolean);
+        const iniciales = palabras
+            .map(p => p.normalize('NFD').replace(/[\u0300-\u036f]/g, '').charAt(0).toUpperCase())
+            .join('');
+        const passwordGenerada = `${ci}${iniciales}`;
+
+        const username = ci;          // El nombre de usuario es el mismo carnet
+        const codigo_interno = ci;    // El código del trabajador también arranca con el CI
+
+        // Verificar si el usuario o código ya existe (incluye eliminados lógicos)
+        const userExists = await db.query(
+            'SELECT * FROM operadores WHERE usuario = $1 OR codigo_interno = $2',
+            [username, codigo_interno]
+        );
+        if (userExists.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'El carnet ya está registrado en el sistema' });
+        }
+
+        // Encriptar la contraseña generada
+        const salt = await bcrypt.genSalt(10);
+        const hashedPsw = await bcrypt.hash(passwordGenerada, salt);
+
+        const newUser = await db.query(
+            `INSERT INTO operadores (nombre_completo, usuario, contrasena, codigo_interno, role)
+             VALUES ($1, $2, $3, $4, 'operador')
+             RETURNING id_operador, nombre_completo, usuario, role`,
+            [fullName, username, hashedPsw, codigo_interno]
+        );
+
+        // Registrar en bitácora del sistema
+        await logCreate({
+            tabla: 'operadores',
+            operadorId: newUser.rows[0].id_operador,
+            registroId: newUser.rows[0].id_operador,
+            descripcion: `Registro rápido: ${fullName} (usuario ${username}) con rol operador`,
+            datosNuevos: { nombre_completo: fullName, usuario: username, role: 'operador', codigo_interno },
+            req
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Cuenta creada mediante registro rápido',
+            userId: newUser.rows[0].id_operador,
+            username,
+            password: passwordGenerada,
+            role: 'operador'
+        });
+
+    } catch (err) {
+        console.error("DEBUG BD ERROR (Registro rápido):", err.message);
+        res.status(500).json({ success: false, message: 'Error BD: ' + err.message });
+    }
+});
+
 // Ruta para inicio de sesión (POST /api/login)
 router.post('/login', async (req, res) => {
     try {

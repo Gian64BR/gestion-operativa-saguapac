@@ -957,7 +957,10 @@ window.deleteAdminEvent = async function () {
         try {
             await apiFetch(`/api/events/${id}`, {
                 method: 'DELETE',
-                body: JSON.stringify({ operador: operador })
+                body: JSON.stringify({
+                    operador: operador,
+                    id_operador_log: parseInt(localStorage.getItem('userId')) || null
+                })
             });
 
             // NOTA: La auditoría ahora se registra automáticamente en el backend
@@ -1194,7 +1197,10 @@ window.deleteSystemUser = async function (userId, userName) {
     if (!confirm(`¿Estás seguro de que deseas ELIMINAR al usuario "${userName}" del sistema?`)) return;
 
     try {
-        await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
+        await apiFetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            body: JSON.stringify({ id_operador_log: parseInt(localStorage.getItem('userId')) || null })
+        });
         // Remove the row from the panel
         const row = document.getElementById(`user-row-${userId}`);
         if (row) row.remove();

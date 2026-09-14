@@ -27,7 +27,47 @@
                 <p>Gestión de Cuentas del Sistema</p>
             </div>
 
-            <form id="registerForm" class="auth-form">
+            <div class="register-tabs">
+                <button type="button" class="reg-tab active" data-tab="full">Registro Completo</button>
+                <button type="button" class="reg-tab" data-tab="quick">Registro Rápido (Carnet)</button>
+            </div>
+
+            <!-- ==================== REGISTRO RÁPIDO ==================== -->
+            <form id="quickRegisterForm" class="auth-form reg-panel hidden" data-panel="quick">
+                <div class="input-group">
+                    <label for="quickFullName">Nombre Completo</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="quickFullName" name="quickFullName"
+                            placeholder="Ej: Gianmarco Bulacia Ruiz" required autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="quickCarnet">Número de Carnet (CI)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="quickCarnet" name="quickCarnet" placeholder="Ej: 8066913"
+                            inputmode="numeric" required autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="quick-preview">
+                    <div class="row"><span>Usuario de acceso:</span> <strong id="quickPreviewUser">—</strong></div>
+                    <div class="row"><span>Contraseña generada:</span> <strong id="quickPreviewPass">—</strong></div>
+                    <small>La cuenta se crea con rol <strong>Operador</strong>. Luego el administrador podrá cambiar la
+                        contraseña y agregar el código del trabajador.</small>
+                </div>
+
+                <div class="form-actions">
+                    <a href="index.html" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        Crear Cuenta Rápida
+                        <div class="ripple"></div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- ==================== REGISTRO COMPLETO ==================== -->
+            <form id="registerForm" class="auth-form reg-panel" data-panel="full">
 
                 <div class="form-row">
                     <div class="input-group">

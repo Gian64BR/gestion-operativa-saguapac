@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS operadores (
     codigo_interno  VARCHAR(30)  NOT NULL UNIQUE,
     role            VARCHAR(20)  NOT NULL DEFAULT 'operador',  -- administrador u operador
     created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+    deleted_at      TIMESTAMP,                                -- BORRADO LÓGICO: NULL = activo
+    deleted_by      INT                                       -- ID del operador que lo eliminó
 );
 
 -- 2. usuarios (socios) - SOLO código de asociado
@@ -22,13 +24,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- 3. tipos_solicitud
 CREATE TABLE IF NOT EXISTS tipos_solicitud (
     id     SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
+    nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- 4. estados
 CREATE TABLE IF NOT EXISTS estados (
     id     SERIAL PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
+    nombre VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- 5. solicitudes
@@ -39,7 +41,10 @@ CREATE TABLE IF NOT EXISTS solicitudes (
     id_tipo_solicitud INT       NOT NULL REFERENCES tipos_solicitud(id),
     id_estado         INT       NOT NULL REFERENCES estados(id),
     descripcion       TEXT,
-    fecha_registro    TIMESTAMP NOT NULL DEFAULT NOW()
+    fecha_registro    TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMP NOT NULL DEFAULT NOW(),  -- última modificación (reglas de estado)
+    deleted_at        TIMESTAMP,                               -- BORRADO LÓGICO: NULL = activa
+    deleted_by        INT                                       -- ID del operador que la eliminó
 );
 
 -- 6. controles
@@ -102,7 +107,9 @@ CREATE TABLE IF NOT EXISTS directorio (
     nota                     TEXT,
     avatar                   TEXT,
     id_operador_creacion     INT REFERENCES operadores(id_operador) ON DELETE SET NULL,
-    id_operador_actualizacion INT REFERENCES operadores(id_operador) ON DELETE SET NULL
+    id_operador_actualizacion INT REFERENCES operadores(id_operador) ON DELETE SET NULL,
+    deleted_at               TIMESTAMP,                        -- BORRADO LÓGICO: NULL = activo
+    deleted_by               INT                               -- ID del operador que lo eliminó
 );
 
 -- Índices para consultas de auditoría en directorio
@@ -127,7 +134,9 @@ CREATE TABLE IF NOT EXISTS eventos (
     uv_afectada  VARCHAR(100),
     estado       VARCHAR(50)  NOT NULL DEFAULT 'programado', -- programado, en_proceso, completado, cancelado
     created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW()
+    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
+    deleted_at   TIMESTAMP,                                   -- BORRADO LÓGICO: NULL = activo
+    deleted_by   INT                                          -- ID del operador que lo eliminó
 );
 
 -- 14. auditoria_eventos (para notificaciones globales e historial visible)
@@ -158,30 +167,15 @@ CREATE TABLE IF NOT EXISTS auditoria_sistema (
     fecha_exac        TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
--- Índice para consultas frecuentes en la bitácora
+-- Índices para consultas frecuentes en la bitácora
 CREATE INDEX IF NOT EXISTS idx_auditoria_sistema_fecha ON auditoria_sistema(fecha_exac DESC);
 CREATE INDEX IF NOT EXISTS idx_auditoria_sistema_tabla ON auditoria_sistema(tabla_origen);
 CREATE INDEX IF NOT EXISTS idx_auditoria_sistema_operador ON auditoria_sistema(id_operador);
 CREATE INDEX IF NOT EXISTS idx_auditoria_sistema_accion ON auditoria_sistema(accion);
 
 -- INSERCIÓN DE DATOS CATÁLOGO POR DEFECTO
-INSERT INTO tipos_solicitud (nombre) VALUES
-('En Base (8.01)'),
-('Arreglo de fuga (8.01)'),
-('Promedio Elevado (8.02)'),
-('Cambio de medidor (8.03)'),
-('Mala lectura (8.04)'),
-('Cambio de categoría (8.06)'),
-('Purga de instalación (8.07)')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO estados (nombre) VALUES
-('Pendiente'),
-('En proceso'),
-('Procedente'),
-('No procedente'),
-('Cerrado')
-ON CONFLICT DO NOTHING;
+-- NOTA: los catálogos tipos_solicitud y estados se siembran de forma idempotente
+-- desde db/init-db.js (ensureCatalogos) para evitar duplicados en cada arranque.
 
 -- Zonas por defecto
 INSERT INTO zonas (nombre) VALUES

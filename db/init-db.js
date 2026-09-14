@@ -267,6 +267,184 @@ async function ensureDirectorioColumns() {
     }
 }
 
+/**
+ * Asegura las columnas de BORRADO LÓGICO (deleted_at / deleted_by) en las tablas
+ * que el sistema "elimina". Nada se borra físicamente: se marca deleted_at.
+ */
+async function ensureSoftDeleteColumns() {
+    const tablas = [
+        { nombre: 'operadores', pk: 'id_operador' },
+        { nombre: 'directorio', pk: 'id' },
+        { nombre: 'eventos', pk: 'id' },
+        { nombre: 'solicitudes', pk: 'id_solicitud' }
+    ];
+
+    for (const tabla of tablas) {
+        try {
+            const check = await db.query(`
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name = $1 AND column_name = 'deleted_at'
+            `, [tabla.nombre]);
+
+            if (check.rows.length === 0) {
+                await db.query(`ALTER TABLE ${tabla.nombre} ADD COLUMN deleted_at TIMESTAMP`);
+                await db.query(`ALTER TABLE ${tabla.nombre} ADD COLUMN deleted_by INT`);
+                console.log(`✓ Columnas de borrado lógico agregadas a ${tabla.nombre}`);
+            }
+
+            // Garantizar el índice siempre (aunque las columnas ya existieran)
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_${tabla.nombre}_deleted_at ON ${tabla.nombre}(deleted_at)`);
+        } catch (err) {
+            console.error(`✗ Error agregando borrado lógico a ${tabla.nombre}:`, err.message);
+        }
+    }
+}
+
+/**
+ * Agrega updated_at a solicitudes (necesario para las reglas de estado 24h/48h).
+ */
+async function ensureSolicitudesColumns() {
+    try {
+        const check = await db.query(`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name = 'solicitudes' AND column_name = 'updated_at'
+        `);
+        if (check.rows.length === 0) {
+            await db.query('ALTER TABLE solicitudes ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT NOW()');
+            // Backfill: las solicitudes existentes no han sido modificadas
+            await db.query('UPDATE solicitudes SET updated_at = fecha_registro');
+            console.log('✓ Columna updated_at agregada a solicitudes');
+        }
+    } catch (err) {
+        console.error('✗ Error agregando updated_at a solicitudes:', err.message);
+    }
+}
+
+/**
+ * Catálogos (tipos_solicitud y estados):
+ *  - Deduplica registros repetidos (el seed anterior no tenía restricción única).
+ *  - Remapea las solicitudes a la fila canónica antes de borrar duplicados.
+ *  - Agrega restricciones UNIQUE para que el seed sea idempotente.
+ *  - Siembra los catálogos canónicos (incluye los estados de cierre).
+ */
+async function ensureCatalogos() {
+    // 1. Deduplicar tipos_solicitud
+    try {
+        await db.query(`
+            UPDATE solicitudes s
+            SET id_tipo_solicitud = k.id_keep
+            FROM tipos_solicitud t
+            JOIN (SELECT nombre, MIN(id) AS id_keep FROM tipos_solicitud GROUP BY nombre) k
+              ON k.nombre = t.nombre
+            WHERE s.id_tipo_solicitud = t.id AND t.id <> k.id_keep
+        `);
+        await db.query(`
+            DELETE FROM tipos_solicitud t
+            USING (SELECT nombre, MIN(id) AS id_keep FROM tipos_solicitud GROUP BY nombre) k
+            WHERE t.nombre = k.nombre AND t.id <> k.id_keep
+        `);
+        console.log('✓ tipos_solicitud deduplicado');
+    } catch (err) {
+        console.error('✗ Error deduplicando tipos_solicitud:', err.message);
+    }
+
+    // 2. Deduplicar estados
+    try {
+        await db.query(`
+            UPDATE solicitudes s
+            SET id_estado = k.id_keep
+            FROM estados e
+            JOIN (SELECT nombre, MIN(id) AS id_keep FROM estados GROUP BY nombre) k
+              ON k.nombre = e.nombre
+            WHERE s.id_estado = e.id AND e.id <> k.id_keep
+        `);
+        await db.query(`
+            DELETE FROM estados e
+            USING (SELECT nombre, MIN(id) AS id_keep FROM estados GROUP BY nombre) k
+            WHERE e.nombre = k.nombre AND e.id <> k.id_keep
+        `);
+        console.log('✓ estados deduplicado');
+    } catch (err) {
+        console.error('✗ Error deduplicando estados:', err.message);
+    }
+
+    // 3. Normalizar nombres con codificación dañada (mojibake) en tipos_solicitud
+    try {
+        await db.query(`
+            UPDATE solicitudes s
+            SET id_tipo_solicitud = c.id
+            FROM tipos_solicitud b
+            JOIN tipos_solicitud c
+              ON c.nombre = replace(replace(b.nombre, 'Ã­', 'í'), 'Ã³', 'ó')
+            WHERE s.id_tipo_solicitud = b.id AND b.nombre <> c.nombre
+        `);
+        await db.query(`
+            DELETE FROM tipos_solicitud b
+            USING tipos_solicitud c
+            WHERE b.nombre <> c.nombre
+              AND c.nombre = replace(replace(b.nombre, 'Ã­', 'í'), 'Ã³', 'ó')
+        `);
+        await db.query(`
+            UPDATE tipos_solicitud
+            SET nombre = replace(replace(nombre, 'Ã­', 'í'), 'Ã³', 'ó')
+            WHERE nombre LIKE '%Ã%'
+        `);
+        console.log('✓ tipos_solicitud normalizado (mojibake)');
+    } catch (err) {
+        console.error('✗ Error normalizando tipos_solicitud:', err.message);
+    }
+
+    // 4. Restricciones UNIQUE (idempotentes)
+    try {
+        await db.query(`
+            DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'estados_nombre_key') THEN
+                    ALTER TABLE estados ADD CONSTRAINT estados_nombre_key UNIQUE (nombre);
+                END IF;
+            END $$;
+        `);
+        await db.query(`
+            DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tipos_solicitud_nombre_key') THEN
+                    ALTER TABLE tipos_solicitud ADD CONSTRAINT tipos_solicitud_nombre_key UNIQUE (nombre);
+                END IF;
+            END $$;
+        `);
+        console.log('✓ Restricciones UNIQUE de catálogos verificadas');
+    } catch (err) {
+        console.error('✗ Error creando restricciones de catálogos:', err.message);
+    }
+
+    // 5. Sembrar catálogos canónicos (idempotente)
+    try {
+        await db.query(`
+            INSERT INTO tipos_solicitud (nombre) VALUES
+            ('En Base (8.01)'),
+            ('Arreglo de fuga (8.01)'),
+            ('Promedio Elevado (8.02)'),
+            ('Cambio de medidor (8.03)'),
+            ('Mala lectura (8.04)'),
+            ('Cambio de categoría (8.06)'),
+            ('Purga de instalación (8.07)')
+            ON CONFLICT (nombre) DO NOTHING
+        `);
+        await db.query(`
+            INSERT INTO estados (nombre) VALUES
+            ('Pendiente'),
+            ('En proceso'),
+            ('Procedente'),
+            ('No procedente'),
+            ('Cerrado'),
+            ('Cerrado - Procedente'),
+            ('Cerrado - No procedente')
+            ON CONFLICT (nombre) DO NOTHING
+        `);
+        console.log('✓ Catálogos (tipos_solicitud y estados) sembrados');
+    } catch (err) {
+        console.error('✗ Error sembrando catálogos:', err.message);
+    }
+}
+
 async function ensureForeignKeyEventos() {
     try {
         // Agregar foreign key a zona_id si no existe
@@ -311,6 +489,9 @@ async function initDatabase() {
     await ensureAuditoriaTable();
     await ensureAuditoriaSistemaTable();
     await ensureDirectorioColumns();
+    await ensureSoftDeleteColumns();
+    await ensureSolicitudesColumns();
+    await ensureCatalogos();
     console.log('✅ Base de datos inicializada correctamente');
 }
 

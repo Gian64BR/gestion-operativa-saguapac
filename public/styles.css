@@ -456,3 +456,74 @@ select option {
         flex-direction: column-reverse;
     }
 }
+/* --- Registro Rápido / pestañas --- */
+.register-tabs {
+    display: flex;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 4px;
+    border-radius: 30px;
+    margin-bottom: 1.4rem;
+}
+
+.reg-tab {
+    flex: 1;
+    padding: 0.65rem 0.8rem;
+    border: none;
+    background: transparent;
+    border-radius: 26px;
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 0.82rem;
+    color: #e8f4ff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reg-tab.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 136, 204, 0.35);
+}
+
+.reg-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.reg-panel.hidden {
+    display: none !important;
+}
+
+.quick-preview {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 136, 204, 0.35);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.85rem;
+    color: #1e293b;
+}
+
+.quick-preview .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.quick-preview .row span {
+    color: #64748b;
+}
+
+.quick-preview strong {
+    font-family: 'Courier New', monospace;
+    color: var(--color-primary-dark);
+    font-size: 0.95rem;
+}
+
+.quick-preview small {
+    display: block;
+    margin-top: 0.5rem;
+    color: #64748b;
+    line-height: 1.4;
+}

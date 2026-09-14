@@ -19,6 +19,7 @@ router.get('/users', async (req, res) => {
                 COALESCE(created_at, NOW()) as created_at,
                 COALESCE(updated_at, NOW()) as last_login
             FROM operadores
+            WHERE deleted_at IS NULL
             ORDER BY nombre_completo ASC
         `);
 
@@ -59,7 +60,7 @@ router.get('/users/:id', async (req, res) => {
                 created_at,
                 updated_at
             FROM operadores
-            WHERE id_operador = $1
+            WHERE id_operador = $1 AND deleted_at IS NULL
         `, [id]);
 
         if (result.rows.length === 0) {
@@ -210,7 +211,7 @@ router.put('/users/:id', async (req, res) => {
         params.push(id);
 
         const result = await db.query(
-            `UPDATE operadores SET ${fields.join(', ')} WHERE id_operador = $${paramIdx} RETURNING *`,
+            `UPDATE operadores SET ${fields.join(', ')} WHERE id_operador = $${paramIdx} AND deleted_at IS NULL RETURNING *`,
             params
         );
 
@@ -248,17 +249,27 @@ router.put('/users/:id', async (req, res) => {
     }
 });
 
-// Eliminar usuario
+// Eliminar usuario (BORRADO LÓGICO — el registro se conserva en la base de datos)
 router.delete('/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { id_operador_log } = req.body || {};
 
-        // Obtener datos antes de eliminar
-        const oldResult = await db.query('SELECT * FROM operadores WHERE id_operador = $1', [id]);
+        // Obtener datos antes de "eliminar"
+        const oldResult = await db.query('SELECT * FROM operadores WHERE id_operador = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
-        const result = await db.query('DELETE FROM operadores WHERE id_operador = $1 RETURNING *', [id]);
+        if (!datosAnteriores) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        const result = await db.query(
+            `UPDATE operadores
+             SET deleted_at = NOW(), deleted_by = $2, updated_at = NOW()
+             WHERE id_operador = $1 AND deleted_at IS NULL
+             RETURNING *`,
+            [id, id_operador_log || null]
+        );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
@@ -269,7 +280,7 @@ router.delete('/users/:id', async (req, res) => {
             tabla: 'operadores',
             operadorId: id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Usuario del sistema eliminado: ${datosAnteriores?.nombre_completo || 'id=' + id}`,
+            descripcion: `Usuario del sistema eliminado (borrado lógico): ${datosAnteriores?.nombre_completo || 'id=' + id}`,
             datosAnteriores,
             req
         });
@@ -304,6 +315,7 @@ router.get('/contacts', async (req, res) => {
             FROM directorio d
             LEFT JOIN operadores oc ON d.id_operador_creacion = oc.id_operador
             LEFT JOIN operadores oa ON d.id_operador_actualizacion = oa.id_operador
+            WHERE d.deleted_at IS NULL
             ORDER BY d.nombre ASC
         `);
 
@@ -372,14 +384,14 @@ router.put('/contacts/:id', async (req, res) => {
         const { nombre, cargo, area, gerencia, telefono, internal_id, nota, avatar, id_operador_log } = req.body;
 
         // Obtener datos anteriores
-        const oldResult = await db.query('SELECT * FROM directorio WHERE id = $1', [id]);
+        const oldResult = await db.query('SELECT * FROM directorio WHERE id = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
         const result = await db.query(
             `UPDATE directorio
              SET nombre = $1, cargo = $2, area = $3, gerencia = $4, telefono = $5, 
                  internal_id = $6, nota = $7, avatar = $8, id_operador_actualizacion = $9
-             WHERE id = $10 RETURNING *`,
+             WHERE id = $10 AND deleted_at IS NULL RETURNING *`,
             [nombre, cargo, area || '', gerencia || '', telefono || '', internal_id || '', nota || null, avatar || null, id_operador_log || null, id]
         );
 
@@ -405,17 +417,27 @@ router.put('/contacts/:id', async (req, res) => {
     }
 });
 
-// Eliminar contacto
+// Eliminar contacto (BORRADO LÓGICO — el registro se conserva en la base de datos)
 router.delete('/contacts/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { id_operador_log } = req.body || {};
 
-        // Obtener datos antes de eliminar
-        const oldResult = await db.query('SELECT * FROM directorio WHERE id = $1', [id]);
+        // Obtener datos antes de "eliminar"
+        const oldResult = await db.query('SELECT * FROM directorio WHERE id = $1 AND deleted_at IS NULL', [id]);
         const datosAnteriores = oldResult.rows[0];
 
-        const result = await db.query('DELETE FROM directorio WHERE id = $1 RETURNING *', [id]);
+        if (!datosAnteriores) {
+            return res.status(404).json({ success: false, message: 'Contacto no encontrado' });
+        }
+
+        const result = await db.query(
+            `UPDATE directorio
+             SET deleted_at = NOW(), deleted_by = $2
+             WHERE id = $1 AND deleted_at IS NULL
+             RETURNING *`,
+            [id, id_operador_log || null]
+        );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Contacto no encontrado' });
@@ -426,7 +448,7 @@ router.delete('/contacts/:id', async (req, res) => {
             tabla: 'directorio',
             operadorId: id_operador_log || null,
             registroId: parseInt(id),
-            descripcion: `Contacto eliminado: ${datosAnteriores?.nombre || 'id=' + id}`,
+            descripcion: `Contacto eliminado (borrado lógico): ${datosAnteriores?.nombre || 'id=' + id}`,
             datosAnteriores,
             req
         });

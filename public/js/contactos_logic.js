@@ -318,7 +318,10 @@ window.deleteSelectedContact = async function () {
 
     if (confirm(`¿Estás seguro de que deseas ELIMINAR el interno de ${name}?`)) {
         try {
-            await apiFetch(`/api/contacts/${dbId}`, { method: 'DELETE' });
+            await apiFetch(`/api/contacts/${dbId}`, {
+                method: 'DELETE',
+                body: JSON.stringify({ id_operador_log: parseInt(localStorage.getItem('userId')) || null })
+            });
             alert("🔴 Interno eliminado del directorio.");
             resetContactForm();
             await loadContacts();

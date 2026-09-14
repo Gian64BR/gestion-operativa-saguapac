@@ -7,11 +7,25 @@ let currentTipo = '';
 let catalogos = { tipos: [], estados: [] };
 let deleteTargetId = null;
 
+// El rol se normaliza a 'admin' al iniciar sesión. isAdmin() viene de utils.js.
+
+// Estados que se pueden asignar manualmente desde el modal de edición
+const ESTADOS_EDITABLES = ['En proceso', 'Procedente', 'No procedente'];
+
 const ESTADO_CLASSES = {
+    'Pendiente': 'status-pendiente',
+    'En proceso': 'status-proceso',
     'Procedente': 'status-procedente',
     'No procedente': 'status-no-procedente',
-    'Cerrado': 'status-cerrado'
+    'Cerrado': 'status-cerrado',
+    'Cerrado - Procedente': 'status-cerrado',
+    'Cerrado - No procedente': 'status-cerrado'
 };
+
+// Una solicitud cerrada es de solo lectura
+function esCerrado(nombreEstado) {
+    return /^cerrado/i.test(nombreEstado || '');
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (typeof setupHeader === 'function') setupHeader();
@@ -78,23 +92,28 @@ function renderFilters() {
     const modalTipo = document.getElementById('tipoSolicitud');
     const modalEstado = document.getElementById('estadoSolicitud');
 
-    const estadosPermitidos = ['Procedente', 'No procedente', 'Cerrado'];
+    // Reconstruir siempre para evitar opciones duplicadas
+    const estadoActual = estadoSelect.value;
+    estadoSelect.innerHTML = '<option value="">Todos los estados</option>';
+    modalEstado.innerHTML = '';
 
-    if (catalogos.estados.length > 0 && estadoSelect.options.length <= 1) {
-        catalogos.estados.forEach(e => {
-            if (estadosPermitidos.includes(e.nombre)) {
-                estadoSelect.add(new Option(e.nombre, e.id));
-                modalEstado.add(new Option(e.nombre, e.id));
-            }
-        });
-    }
+    catalogos.estados.forEach(e => {
+        estadoSelect.add(new Option(e.nombre, e.id));
+        if (ESTADOS_EDITABLES.includes(e.nombre)) {
+            modalEstado.add(new Option(e.nombre, e.id));
+        }
+    });
+    estadoSelect.value = estadoActual;
 
-    if (catalogos.tipos.length > 0 && tipoSelect.options.length <= 1) {
-        catalogos.tipos.forEach(t => {
-            tipoSelect.add(new Option(t.nombre, t.id));
-            modalTipo.add(new Option(t.nombre, t.id));
-        });
-    }
+    const tipoActual = tipoSelect.value;
+    tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
+    modalTipo.innerHTML = '';
+
+    catalogos.tipos.forEach(t => {
+        tipoSelect.add(new Option(t.nombre, t.id));
+        modalTipo.add(new Option(t.nombre, t.id));
+    });
+    tipoSelect.value = tipoActual;
 }
 
 function renderTable(data, tbody) {
@@ -118,6 +137,24 @@ function renderTable(data, tbody) {
         });
         const desc = s.descripcion || '—';
         const truncDesc = desc.length > 60 ? desc.substring(0, 60) + '...' : desc;
+        const cerrada = esCerrado(s.estado_nombre);
+
+        const btnVer = `
+                <button class="action-btn" onclick="viewSolicitud(${s.id_solicitud})" title="Ver detalle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>`;
+
+        // Solo se puede editar si la solicitud no está cerrada
+        const btnEditar = cerrada ? '' : `
+                <button class="action-btn" onclick="openEditModal(${s.id_solicitud})" title="Editar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>`;
+
+        // Solo el administrador puede eliminar
+        const btnEliminar = isAdmin() ? `
+                <button class="action-btn danger" onclick="openDeleteModal(${s.id_solicitud})" title="Eliminar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>` : '';
 
         return `<tr>
             <td><strong>#${rowNum}</strong></td>
@@ -127,17 +164,7 @@ function renderTable(data, tbody) {
             <td><div class="desc-cell" title="${desc.replace(/"/g, '&quot;')}">${truncDesc}</div></td>
             <td>${s.operador_nombre || s.operador_usuario || '—'}</td>
             <td style="font-size:0.82rem;color:var(--color-text-muted);">${fecha}</td>
-            <td style="text-align:center;white-space:nowrap;">
-                <button class="action-btn" onclick="viewSolicitud(${s.id_solicitud})" title="Ver detalle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                </button>
-                <button class="action-btn" onclick="openEditModal(${s.id_solicitud})" title="Editar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-                <button class="action-btn danger" onclick="openDeleteModal(${s.id_solicitud})" title="Eliminar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </td>
+            <td style="text-align:center;white-space:nowrap;">${btnVer}${btnEditar}${btnEliminar}</td>
         </tr>`;
     }).join('');
 }
@@ -176,6 +203,11 @@ window.openEditModal = async function (id) {
         const response = await apiFetch(`/api/solicitudes/${id}`);
         const s = response.data;
 
+        if (esCerrado(s.estado_nombre)) {
+            alert(`La solicitud está ${s.estado_nombre} y ya no puede editarse. Solo puede consultarse.`);
+            return;
+        }
+
         document.getElementById('modalTitle').textContent = 'Editar Solicitud #' + id;
         document.getElementById('editId').value = s.id_solicitud;
         document.getElementById('codigoAsociado').value = s.codigo_asociado;
@@ -205,9 +237,14 @@ window.saveSolicitud = async function () {
         return;
     }
 
+    if (!estado) {
+        showFormError('Debe seleccionar un estado (En proceso, Procedente o No procedente).');
+        return;
+    }
+
     const userId = localStorage.getItem('userId');
     const payload = {
-        id_estado: parseInt(estado || 1),
+        id_estado: parseInt(estado),
         descripcion: descripcion || null,
         id_operador_log: userId ? parseInt(userId) : null
     };
@@ -233,6 +270,10 @@ function showFormError(msg) {
 
 // ==================== DELETE ====================
 window.openDeleteModal = function (id) {
+    if (!isAdmin()) {
+        alert('Solo un administrador puede eliminar solicitudes.');
+        return;
+    }
     deleteTargetId = id;
     document.getElementById('deleteInfo').textContent = `Se eliminará la solicitud #${id}. Esta acción no se puede deshacer.`;
     openModal('deleteModal');
