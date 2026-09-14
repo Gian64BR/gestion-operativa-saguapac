@@ -56,6 +56,23 @@ DELETE FROM estados e
 USING (SELECT nombre, MIN(id) AS id_keep FROM estados GROUP BY nombre) k
 WHERE e.nombre = k.nombre AND e.id <> k.id_keep;
 
+-- 5b. Normalizar nombres con codificación dañada (mojibake) en tipos_solicitud
+UPDATE solicitudes s
+SET id_tipo_solicitud = c.id
+FROM tipos_solicitud b
+JOIN tipos_solicitud c
+  ON c.nombre = replace(replace(b.nombre, 'Ã­', 'í'), 'Ã³', 'ó')
+WHERE s.id_tipo_solicitud = b.id AND b.nombre <> c.nombre;
+
+DELETE FROM tipos_solicitud b
+USING tipos_solicitud c
+WHERE b.nombre <> c.nombre
+  AND c.nombre = replace(replace(b.nombre, 'Ã­', 'í'), 'Ã³', 'ó');
+
+UPDATE tipos_solicitud
+SET nombre = replace(replace(nombre, 'Ã­', 'í'), 'Ã³', 'ó')
+WHERE nombre LIKE '%Ã%';
+
 -- 6. Restricciones UNIQUE (para que el sembrado sea idempotente)
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'estados_nombre_key') THEN
